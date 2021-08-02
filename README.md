@@ -12,6 +12,6 @@ Miscelaneous helpers to download deb files for use with aptly automatically. Jus
 - depends: `curl`, `jq`, `wget`
 
 TODO:
-[ ] automatically import downloaded debs to aptly
-[ ] rewrite helpers in python, because it's much nicer than shell scripts
-[ ] more intelligently handle github downloads (e.g. filter by architecture, allow download of versions other than latest), do not download if the latest version has already been downloaded
+* [ ] automatically import downloaded debs to aptly
+* [ ] rewrite helpers in python, because it's much nicer than shell scripts
+* [ ] more intelligently handle github downloads (e.g. filter by architecture, allow download of versions other than latest), do not download if the latest version has already been downloaded
