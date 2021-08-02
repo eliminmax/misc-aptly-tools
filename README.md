@@ -8,7 +8,7 @@ Miscelaneous helpers to download deb files for use with aptly automatically. Jus
 **`minecraft/minecraft-latest.sh`**: downloads latest minecraft linux `.deb` build, and copies it to {git-root}/debs/minecraft.deb
 - depends: `curl`
 
-**`github/gh-download**: reads a list of repositories from {git-root}/github/repos.list, uses the Github API and the **jq** tool to parse the list of downloadable `.deb` files in the latest release, and downloads them all to {git-root}/debs
+**`github/gh-download`**: reads a list of repositories from {git-root}/github/repos.list, uses the Github API and the **jq** tool to parse the list of downloadable `.deb` files in the latest release, and downloads them all to {git-root}/debs
 - depends: `curl`, `jq`, `wget`
 
 TODO:
