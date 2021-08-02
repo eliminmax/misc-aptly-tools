@@ -1,0 +1,15 @@
+#!/bin/bash
+
+DIR="$(dirname $0)"
+cd "$DIR"
+
+while IFS="" read -r REPO || [ -n "$REPO" ]; do
+	curl --silent "https://api.github.com/repos/$REPO/releases/latest" |
+	jq -r '.assets[] | select(.name | test(".deb")) | .browser_download_url' |
+    while read i; do 
+        mkdir -p "$DIR"/../debs
+        cd "$DIR"/../debs
+        wget $i
+        cd $DIR
+    done
+done <gh-repos.list
