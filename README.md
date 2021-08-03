@@ -20,6 +20,7 @@ I made this because I wanted to be able to use `apt update` and `apt upgrade` to
 ### General: 
 * [ ] automatically import downloaded debs to aptly
 * [ ] rewrite helpers in python, because it's much easier to improve/maintain than shell scripts - *in progress*
+* [ ] write proper documentation
 
 ### Github:
 * [x] use a less hacked-together system than the current one to handle determining which files to download and add to the repository
