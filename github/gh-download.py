@@ -30,6 +30,8 @@ DEB_DIR = Path('..', 'debs')
 API_TEMPLATE = "https://api.github.com/repos/{user}/{repo}/releases/latest"
 # Path for templates
 REPO_DL_TEMPLATES = SCRIPT_ROOT.joinpath("gh-repo-templates")
+# Path for prev
+REPO_DL_TEMPLATES = SCRIPT_ROOT.joinpath("gh-repo-templates")
 # This regex is not exhaustive, but it's a good sanity check
 REPO_NAME_REGEX = re.compile('^[a-zA-Z0-9_\-\.]+/[a-zA-Z0-9\-_\.]+$')
 
@@ -133,6 +135,8 @@ def bulk_download():
                     raise BadRepoListNameError('Bad Github Repo: ' + repo )
                 # get the user/repo info
                 gh_user, gh_repo = repo.split('/')
+                # check if the latest version is already added
+                
                 # load the templates for the repo
                 template_path = REPO_DL_TEMPLATES.joinpath(gh_user, gh_repo)
                 if Path.is_file(template_path):
@@ -154,9 +158,6 @@ def bulk_download():
                     raise MissingRepoTemplateError
 
 if __name__ == "__main__":
-    import sys
-    import getopt
-    opt = getop
     print(
 
         "Miscellaneous Aptly Tools Copyright (C) 2021 Eli Array Minkoff\n" +
