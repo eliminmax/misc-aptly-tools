@@ -17,8 +17,6 @@ This script is a part of Miscellaneous Aptly Tools
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import requests
-import os
-import sys
 import re
 from pathlib import Path
 
@@ -156,12 +154,16 @@ def bulk_download():
                     raise MissingRepoTemplateError
 
 if __name__ == "__main__":
+    import sys
+    import getopt
+    opt = getop
     print(
 
         "Miscellaneous Aptly Tools Copyright (C) 2021 Eli Array Minkoff\n" +
-        "This program comes with ABSOLUTELY NO WARRANTY; for details, run " +
-        "`gh-download warranty`.\n" +
-        "This is free software, and you are welcome to redistribute" +
-        "it under certain conditions; for details, run `gh-download sharing`."
+        "This program comes with ABSOLUTELY NO WARRANTY; " +
+        "This is free software, and you are welcome to redistribute"  +
+        "it under certain conditions; for details, " +
+        "see the GNU General Public Licence version 3, " + 
+        "available in the LICENCE file that should have come with this."
     )
     bulk_download()
