@@ -1,10 +1,29 @@
 #!/usr/bin/env python3
+"""
+This script is a part of Miscellaneous Aptly Tools
+    Copyright (C) 2021 Eli Array Minkoff
 
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""
 import requests
 import os
 import sys
 import re
 from pathlib import Path
+
+# Print licence info
+
 
 # Declare Constants
 SCRIPT_ROOT = Path().cwd()
@@ -101,8 +120,7 @@ def get_template_match(template_string, release_info, version_regex):
         # Will run if no match found
         raise BadTemplateError(f"no match for template {template_string}")
 
-
-if __name__ == "__main__":
+def bulk_download():
     if not DEB_DIR.is_dir():
         DEB_DIR.mkdir(parents=True)
     with open(SCRIPT_ROOT.joinpath("gh-repos.list"), 'r') as repo_list:
@@ -137,3 +155,13 @@ if __name__ == "__main__":
                 else:
                     raise MissingRepoTemplateError
 
+if __name__ == "__main__":
+    print(
+
+        "Miscellaneous Aptly Tools Copyright (C) 2021 Eli Array Minkoff\n" +
+        "This program comes with ABSOLUTELY NO WARRANTY; for details, run " +
+        "`gh-download warranty`.\n" +
+        "This is free software, and you are welcome to redistribute" +
+        "it under certain conditions; for details, run `gh-download sharing`."
+    )
+    bulk_download()
