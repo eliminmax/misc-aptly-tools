@@ -6,20 +6,15 @@ I made this because I wanted to be able to use `apt update` and `apt upgrade` to
 
 **THIS SOFTWARE IS IN A PRE-ALPHA STATE, AND SHOULD NOT BE USED IN ANY PRODUCTION ENVIRONMENT!**
 
-**`discord/discord-latest.sh`**: downloads latest discord linux `.deb` build, and copies it to {git-root}/debs/discord.deb
-- depends: `curl`
+**`static-url/package_urls.json`:** reads a list of static urls for deb packages, and downloads them, adding them if their md5 sum differs from the most recent one for the software
 
-**`minecraft/minecraft-latest.sh`**: downloads latest minecraft linux `.deb` build, and copies it to {git-root}/debs/minecraft.deb
-- depends: `curl`
-
-**`github/gh-download`**: reads a list of repositories from {git-root}/github/repos.list, uses the Github API and the **jq** tool to parse the list of downloadable `.deb` files in the latest release, and downloads them all to {git-root}/debs
-- depends: `curl`, `jq`, `wget`
+**`github/gh-download.py`**: reads a list of repositories from {git-root}/githugh-repos.json, uses the Github API and the `json` library to parse the list of downloadable `.deb` files in the latest release, and downloads new files to {git-root}/debs
 
 ## TODO:
 
 ### General: 
 * [ ] automatically import downloaded debs to aptly
-* [ ] rewrite helpers in python, because it's much easier to improve/maintain than shell scripts - *in progress*
+* [x] rewrite helpers in python, because it's much easier to improve/maintain than shell scripts
 * [ ] write proper documentation
 
 ### Github:
