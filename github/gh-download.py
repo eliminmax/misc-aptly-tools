@@ -22,10 +22,10 @@ import json
 from pathlib import Path
 
 # Declare Constants
-SCRIPT_ROOT = Path().cwd()
+SCRIPT_ROOT = Path.cwd()
 DEB_DIR = Path('..', 'debs')
 # Pattern for Github API calls
-API_TEMPLATE = "https://api.github.com/repos/}/releases/latest"
+API_TEMPLATE = "https://api.github.com/repos/{}/releases/latest"
 # Path for patterns
 REPO_DL_TEMPLATES = SCRIPT_ROOT.joinpath("gh-repo-patterns")
 REPO_VERSION_FILE = SCRIPT_ROOT.joinpath("gh-repo-saved-versions.json")
@@ -128,17 +128,17 @@ def version_exists(repo, version, saved_versions):
         version: str - the version identifier
         saved_versions: dict - the saved versions info from REPO_VERSION_FILE
     """
-    if repo_name in saved_versions.keys():
-        if version in saved_versions[repo_name]:
+    if repo in saved_versions.keys():
+        if version in saved_versions[repo]:
             return True
         else:
-            saved_versions[repo_name].append(version)
+            saved_versions[repo].append(version)
     else:
-        saved_versions[repo_name] = [version]
+        saved_versions[repo] = [version]
     return False
 
 
-def bulk_download():
+def get_new():
     if not DEB_DIR.is_dir():
         DEB_DIR.mkdir(parents=True)
     if REPO_VERSION_FILE.is_file():
@@ -146,41 +146,29 @@ def bulk_download():
             save_vers = json.load(json_file)
     else:
         save_vers = {}
-    with open(SCRIPT_ROOT.joinpath("gh-repos.list"), 'r') as repo_list:
-        for entry in repo_list.readlines():
-            repo = entry.strip()
-            if repo:
-                if repo[0] == '#':
-                    # skip to next item if it's a comment:
-                    continue
-                # throw an error if it doesn't match the regex for github repos
-                if not REPO_NAME_REGEX.match(repo):
-                    raise BadRepoListNameError('Bad Github Repo: ' + repo)
-                # load the configuration for the repo
-                with open('gh-repos.json', 'r') as repo_conf_file:
-                    repo_conf = json.load(repo_conf_file)
-                if repo in repo_conf.keys():
-                    version_regex = repo_conf[repo]['regex']
-                    patterns = repo_conf[repo]['patterns']
-                    # load json info
-                    release_info = get_latest_release_info(repo)
-                    version = release_info['version']
-                    # check if version is already known
-                    if not version_exists(repo, version, save_vers):
-                        # download all files matching patterns
-                        for pattern_str in patterns:
-                            match = get_pattern_match(
-                                pattern_str, release_info, version_regex)
-                            deb_path = DEB_DIR.joinpath(match[0])
-                            with open(deb_path, 'wb') as debfile:
-                                debfile.write(
-                                    requests.get(
-                                        match[1],
-                                        allow_redirects=True).content)
-                else:
-                    raise MissingRepoPatternError
-                with open(REPO_VERSION_FILE, 'w') as json_file:
-                    json.dump(save_vers, json_file)
+    with open("gh-repos.json", 'r') as repo_conf_file:
+        repo_conf = json.load(repo_conf_file)
+    for repo in repo_conf.keys():
+        # throw an error if it doesn't match the regex for github repos
+        if not REPO_NAME_REGEX.match(repo):
+            raise BadRepoListNameError('Bad Github Repo: ' + repo)
+        version_regex = repo_conf[repo]['regex']
+        patterns = repo_conf[repo]['patterns']
+        # load json info
+        release_info = get_latest_release_info(repo)
+        version = release_info['version']
+        # check if version is already known
+        if not version_exists(repo, version, save_vers):
+            # download all files matching patterns
+            for pattern_str in patterns:
+                match = get_pattern_match(
+                    pattern_str, release_info, version_regex)
+                with open(DEB_DIR.joinpath(match[0]), 'wb') as debfile:
+                    debfile.write(
+                        requests.get(match[1],allow_redirects=True).content
+                    )
+    with open(REPO_VERSION_FILE, 'w') as json_file:
+        json.dump(save_vers, json_file)
 
 
 if __name__ == "__main__":
@@ -190,4 +178,4 @@ if __name__ == "__main__":
           "it under certain conditions; for details, " +
           "see the GNU General Public Licence version 3, " +
           "available in the LICENCE file that should have come with this.")
-    bulk_download()
+    get_new()
