@@ -114,22 +114,22 @@ def get_pattern_match(pattern_string, release_info, version_regex):
 
 
 def get_new(verbose=False):
-    """Download all new files"""
+    """Download all new .deb packages"""
     def report(message, indent=0):
         if verbose:
             print(("    " * indent) + str(message))
     report("Loading configuration from gh-repos.json")
     with open("gh-repos.json", 'r') as repo_conf_file:
         repo_conf = json.load(repo_conf_file)
-    report("Loaded configuration...", 1)
-    for repo in repo_conf.keys():
+    report("Loaded configuration", 1)
+    for repo in repo_conf:
         report(f"Working on repository {repo}")
         # throw an error if it doesn't match the regex for github repos
         if not REPO_NAME_REGEX.match(repo):
             raise BadRepoListNameError('Bad Github Repo: ' + repo)
         version_regex = repo_conf[repo]['regex']
         patterns = repo_conf[repo]['patterns']
-        if 'versions' not in repo_conf[repo].keys():
+        if 'versions' not in repo_conf[repo]:
             repo_conf[repo]['versions'] = []
         existing_versions = repo_conf[repo]['versions']
         report(f"Existing versions: {[v for v in existing_versions]}", 1)
@@ -167,3 +167,4 @@ if __name__ == "__main__":
     if not DEB_DIR.is_dir():
         DEB_DIR.mkdir(parents=True)
     get_new(verbose=True)
+
