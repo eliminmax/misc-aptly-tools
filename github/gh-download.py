@@ -124,7 +124,10 @@ def get_template_match(template_string, release_info, version_regex):
 
 def version_exists(repo_name, version, saved_versions):
     """Check if the version has already been downloaded:
-    
+    Args:
+        repo_name: str - the name of the Github repository
+        version: str - the version identifier
+        saved_versions: dict - the saved versions info from REPO_VERSION_FILE
     """
     if repo_name in saved_versions.keys():
         if version in saved_versions[repo_name]:
@@ -163,9 +166,12 @@ def bulk_download():
                         lines = [l.strip() for l in tf.readlines()]
                         version_regex = lines[0]
                         templates = lines[1:]
+                    # load json info
                     release_info = get_latest_release_info(gh_user, gh_repo)
                     version = release_info['version']
+                    # check if version is already known
                     if not version_exists(repo, version, save_vers):
+                        # download all files matching templates
                         for template_str in templates:
                             match = get_template_match(
                                 template_str, release_info, version_regex)
