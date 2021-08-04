@@ -1,0 +1,10 @@
+{
+    "discord": {
+        "url": "https://discord.com/api/download?platform=linux&format=deb",
+        "md5": "e6a4650c46b4356a8909b5b2d964bd16"
+    },
+    "minecraft": {
+        "url": "https://launcher.mojang.com/download/Minecraft.deb",
+        "md5": "1ea441810f5952525ddf6e06baecbd29"
+    }
+}
