@@ -45,7 +45,7 @@ def get_new():
         previous_md5 = package['md5'] if 'md5' in package.keys() else ''
         package['md5'] = download_latest(package_name, url, previous_md5)
     with open('package_urls.json', 'w') as package_url_json:
-        json.dump(packages, package_url_json)
+        json.dump(packages, package_url_json, indent=4)
 
 
 if __name__ == '__main__':
