@@ -24,18 +24,18 @@ from pathlib import Path
 # Declare Constants
 SCRIPT_ROOT = Path().cwd()
 DEB_DIR = Path('..', 'debs')
-# Template for Github API calls
-API_TEMPLATE = "https://api.github.com/repos/{user}/{repo}/releases/latest"
-# Path for templates
-REPO_DL_TEMPLATES = SCRIPT_ROOT.joinpath("gh-repo-templates")
+# Pattern for Github API calls
+API_TEMPLATE = "https://api.github.com/repos/}/releases/latest"
+# Path for patterns
+REPO_DL_TEMPLATES = SCRIPT_ROOT.joinpath("gh-repo-patterns")
 REPO_VERSION_FILE = SCRIPT_ROOT.joinpath("gh-repo-saved-versions.json")
 # This regex is not exhaustive, but it's a good sanity check
 REPO_NAME_REGEX = re.compile('^[a-zA-Z0-9_\-\.]+/[a-zA-Z0-9\-_\.]+$')
 
 
 # Custom errors
-class MissingRepoTemplateError(OSError):
-    """Raised if repo template is missing"""
+class MissingRepoPatternError(OSError):
+    """Raised if repo pattern is missing"""
     pass
 
 
@@ -49,16 +49,15 @@ class GHRepoError(ValueError):
     pass
 
 
-class BadTemplateError(ValueError):
-    """Raised if none of the downloadable files matched a template"""
+class BadPatternError(ValueError):
+    """Raised if none of the downloadable files matched a pattern"""
     pass
 
 
-def get_latest_release_info(gh_user, gh_repo):
+def get_latest_release_info(repo):
     """Get and parse the JSON info for the latest Github release for the repo
     Args:
-        gh_user: the username of the Github repository's owner
-        gh_repo: the name of the Github repository
+        repo: the name of the Github repository (e.g. 'sharkdp/fd'
     Returns:
         A dictionary with the relevant information extracted from the reply
         ['version']: (string) the version name for the release
@@ -70,7 +69,7 @@ def get_latest_release_info(gh_user, gh_repo):
             if the API call returns an error code
 
     """
-    api_call = requests.get(API_TEMPLATE.format(user=gh_user, repo=gh_repo))
+    api_call = requests.get(API_TEMPLATE.format(repo))
     # Make sure that the API call was successful
     if not api_call.ok:
         raise GHRepoError('Error with Github API call\n' +
@@ -86,46 +85,46 @@ def get_latest_release_info(gh_user, gh_repo):
     return parsed_info
 
 
-def check_template(template_string, version_name, file_name):
-    """Check if a downloadable file name matches a template string
+def check_pattern(pattern_string, version_name, file_name):
+    """Check if a downloadable file name matches a pattern string
     Args:
-        template_string: a string with the filename, with {VERSION}
+        pattern_string: a string with the filename, with {VERSION}
             in place of the version name
         version_name: the release version name/number
         file_name: the name of the downloadable to check
     Returns:
-        bool: True if the template string matches the given filename,
+        bool: True if the pattern string matches the given filename,
             False otherwise
     """
-    expected_file_name = template_string.format(VERSION=version_name)
+    expected_file_name = pattern_string.format(VERSION=version_name)
     return expected_file_name == file_name
 
 
-def get_template_match(template_string, release_info, version_regex):
-    """Get the url for the download that matches a template
+def get_pattern_match(pattern_string, release_info, version_regex):
+    """Get the url for the download that matches a pattern
     Args:
-        template_string: str - template string to check
+        pattern_string: str - pattern string to check
         release_info: dict - output of get_latest_release_info
         version_regex: str - regex pattern to get the part of the version
                                 in the .deb package name
         Returns:
         str - the URL of the download
     Raises:
-        BadTemplateError if no match exists
+        BadPatternError if no match exists
     """
     version = re.search(version_regex, release_info['version']).group(1)
     for dl in release_info['dl']:
-        if check_template(template_string, version, dl[0]):
+        if check_pattern(pattern_string, version, dl[0]):
             return dl
     else:
         # Will run if no match found
-        raise BadTemplateError(f"no match for template {template_string}")
+        raise BadPatternError(f"no match for pattern {pattern_string}")
 
 
-def version_exists(repo_name, version, saved_versions):
+def version_exists(repo, version, saved_versions):
     """Check if the version has already been downloaded:
     Args:
-        repo_name: str - the name of the Github repository
+        repo: str - the name of the Github repository
         version: str - the version identifier
         saved_versions: dict - the saved versions info from REPO_VERSION_FILE
     """
@@ -154,37 +153,34 @@ def bulk_download():
                 if repo[0] == '#':
                     # skip to next item if it's a comment:
                     continue
-                # throw an error if it doesn't match the regex for github repos:
+                # throw an error if it doesn't match the regex for github repos
                 if not REPO_NAME_REGEX.match(repo):
                     raise BadRepoListNameError('Bad Github Repo: ' + repo)
-                # get the user/repo info
-                gh_user, gh_repo = repo.split('/')
-                # load the templates for the repo
-                template_path = REPO_DL_TEMPLATES.joinpath(gh_user, gh_repo)
-                if Path.is_file(template_path):
-                    with open(template_path, 'r') as tf:
-                        lines = [l.strip() for l in tf.readlines()]
-                        version_regex = lines[0]
-                        templates = lines[1:]
+                # load the configuration for the repo
+                with open('gh-repos.json', 'r') as repo_conf_file:
+                    repo_conf = json.load(repo_conf_file)
+                if repo in repo_conf.keys():
+                    version_regex = repo_conf[repo]['regex']
+                    patterns = repo_conf[repo]['patterns']
                     # load json info
-                    release_info = get_latest_release_info(gh_user, gh_repo)
+                    release_info = get_latest_release_info(repo)
                     version = release_info['version']
                     # check if version is already known
                     if not version_exists(repo, version, save_vers):
-                        # download all files matching templates
-                        for template_str in templates:
-                            match = get_template_match(
-                                template_str, release_info, version_regex)
+                        # download all files matching patterns
+                        for pattern_str in patterns:
+                            match = get_pattern_match(
+                                pattern_str, release_info, version_regex)
                             deb_path = DEB_DIR.joinpath(match[0])
                             with open(deb_path, 'wb') as debfile:
                                 debfile.write(
                                     requests.get(
                                         match[1],
                                         allow_redirects=True).content)
-                    with open(REPO_VERSION_FILE, 'w') as json_file:
-                        json.dump(save_vers, json_file)
                 else:
-                    raise MissingRepoTemplateError
+                    raise MissingRepoPatternError
+                with open(REPO_VERSION_FILE, 'w') as json_file:
+                    json.dump(save_vers, json_file)
 
 
 if __name__ == "__main__":
