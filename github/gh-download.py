@@ -113,11 +113,17 @@ def get_pattern_match(pattern_string, release_info, version_regex):
         raise BadPatternError(f"no match for pattern {pattern_string}")
 
 
-def get_new():
+def get_new(verbose=False):
     """Download all new files"""
+    def report(message, indent=0):
+        if verbose:
+            print(("    " * indent) + str(message))
+    report("Loading configuration from gh-repos.json")
     with open("gh-repos.json", 'r') as repo_conf_file:
         repo_conf = json.load(repo_conf_file)
+    report("Loaded configuration...", 1)
     for repo in repo_conf.keys():
+        report(f"Working on repository {repo}")
         # throw an error if it doesn't match the regex for github repos
         if not REPO_NAME_REGEX.match(repo):
             raise BadRepoListNameError('Bad Github Repo: ' + repo)
@@ -126,11 +132,14 @@ def get_new():
         if 'versions' not in repo_conf[repo].keys():
             repo_conf[repo]['versions'] = []
         existing_versions = repo_conf[repo]['versions']
+        report(f"Existing versions: {[v for v in existing_versions]}", 1)
         # load json info
         release_info = get_latest_release_info(repo)
         version = release_info['version']
+        report(f"Latest upstream version: {version}", 1)
         # check if version is already known
         if version not in existing_versions:
+            report("Latest upstream version is not in existing versions", 1)
             existing_versions.append(version)
             # download all files matching patterns
             for pattern_str in patterns:
@@ -138,11 +147,13 @@ def get_new():
                     pattern_str, release_info, version_regex
                 )
                 with open(DEB_DIR.joinpath(match[0]), 'wb') as debfile:
+                    report(f"Downloading file {match[0]} to ../debs", 2)
                     debfile.write(
                         requests.get(match[1], allow_redirects=True).content
                     )
     # Save updated information to gh-repos.json
     with open('gh-repos.json', 'w') as json_file:
+        report(f"Writing updated info to gh-repos.json")
         json.dump(repo_conf, json_file, indent=4)
 
 
@@ -155,4 +166,4 @@ if __name__ == "__main__":
           "available in the LICENCE file that should have come with this.")
     if not DEB_DIR.is_dir():
         DEB_DIR.mkdir(parents=True)
-    get_new()
+    get_new(verbose=True)
