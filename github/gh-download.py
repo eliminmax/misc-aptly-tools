@@ -18,10 +18,8 @@ This script is a part of Miscellaneous Aptly Tools
 """
 import requests
 import re
+import json
 from pathlib import Path
-
-# Print licence info
-
 
 # Declare Constants
 SCRIPT_ROOT = Path().cwd()
@@ -30,27 +28,31 @@ DEB_DIR = Path('..', 'debs')
 API_TEMPLATE = "https://api.github.com/repos/{user}/{repo}/releases/latest"
 # Path for templates
 REPO_DL_TEMPLATES = SCRIPT_ROOT.joinpath("gh-repo-templates")
-# Path for prev
-REPO_DL_TEMPLATES = SCRIPT_ROOT.joinpath("gh-repo-templates")
+REPO_VERSION_FILE = SCRIPT_ROOT.joinpath("gh-repo-saved-versions.json")
 # This regex is not exhaustive, but it's a good sanity check
 REPO_NAME_REGEX = re.compile('^[a-zA-Z0-9_\-\.]+/[a-zA-Z0-9\-_\.]+$')
+
 
 # Custom errors
 class MissingRepoTemplateError(OSError):
     """Raised if repo template is missing"""
     pass
 
+
 class BadRepoNameError(ValueError):
     """Raised if the repo name fails the REPO_NAME_REGEX check"""
     pass
+
 
 class GHRepoError(ValueError):
     """Raised if a Github API call returns an error"""
     pass
 
+
 class BadTemplateError(ValueError):
     """Raised if none of the downloadable files matched a template"""
     pass
+
 
 def get_latest_release_info(gh_user, gh_repo):
     """Get and parse the JSON info for the latest Github release for the repo
@@ -71,16 +73,14 @@ def get_latest_release_info(gh_user, gh_repo):
     api_call = requests.get(API_TEMPLATE.format(user=gh_user, repo=gh_repo))
     # Make sure that the API call was successful
     if not api_call.ok:
-        raise GHRepoError(
-            'Error with Github API call\n' +
-            'HTTP status code: {}\n'.format(api_call.status_code) +
-            'HTTP reason: {}'.format(api_call.reason)
-        )
+        raise GHRepoError('Error with Github API call\n' +
+                          'HTTP status code: {}\n'.format(api_call.status_code)
+                          + 'HTTP reason: {}'.format(api_call.reason))
     # get a dict from the api call output
     api_json = api_call.json()
     # get the release name and all downloadable assets into a dict to return
     parsed_info = {}
-    parsed_info['version'] = api_json['name'] 
+    parsed_info['version'] = api_json['name']
     dl_key = 'browser_download_url'
     parsed_info['dl'] = [(i['name'], i[dl_key]) for i in api_json['assets']]
     return parsed_info
@@ -99,6 +99,7 @@ def check_template(template_string, version_name, file_name):
     """
     expected_file_name = template_string.format(VERSION=version_name)
     return expected_file_name == file_name
+
 
 def get_template_match(template_string, release_info, version_regex):
     """Get the url for the download that matches a template
@@ -120,9 +121,29 @@ def get_template_match(template_string, release_info, version_regex):
         # Will run if no match found
         raise BadTemplateError(f"no match for template {template_string}")
 
+
+def version_exists(repo_name, version, saved_versions):
+    """Check if the version has already been downloaded:
+    
+    """
+    if repo_name in saved_versions.keys():
+        if version in saved_versions[repo_name]:
+            return True
+        else:
+            saved_versions[repo_name].append(version)
+    else:
+        saved_versions[repo_name] = [version]
+    return False
+
+
 def bulk_download():
     if not DEB_DIR.is_dir():
         DEB_DIR.mkdir(parents=True)
+    if REPO_VERSION_FILE.is_file():
+        with open(REPO_VERSION_FILE, "r") as json_file:
+            save_vers = json.load(json_file)
+    else:
+        save_vers = {}
     with open(SCRIPT_ROOT.joinpath("gh-repos.list"), 'r') as repo_list:
         for entry in repo_list.readlines():
             repo = entry.strip()
@@ -132,11 +153,9 @@ def bulk_download():
                     continue
                 # throw an error if it doesn't match the regex for github repos:
                 if not REPO_NAME_REGEX.match(repo):
-                    raise BadRepoListNameError('Bad Github Repo: ' + repo )
+                    raise BadRepoListNameError('Bad Github Repo: ' + repo)
                 # get the user/repo info
                 gh_user, gh_repo = repo.split('/')
-                # check if the latest version is already added
-                
                 # load the templates for the repo
                 template_path = REPO_DL_TEMPLATES.joinpath(gh_user, gh_repo)
                 if Path.is_file(template_path):
@@ -145,26 +164,28 @@ def bulk_download():
                         version_regex = lines[0]
                         templates = lines[1:]
                     release_info = get_latest_release_info(gh_user, gh_repo)
-                    for template_str in templates:
-                        match = get_template_match(template_str,
-                                                   release_info,
-                                                   version_regex)
-                        with open(DEB_DIR.joinpath(match[0]), 'wb') as debfile:
-                           debfile.write(
-                               requests.get(
-                                   match[1], allow_redirects=True
-                               ).content)
+                    version = release_info['version']
+                    if not version_exists(repo, version, save_vers):
+                        for template_str in templates:
+                            match = get_template_match(
+                                template_str, release_info, version_regex)
+                            deb_path = DEB_DIR.joinpath(match[0])
+                            with open(deb_path, 'wb') as debfile:
+                                debfile.write(
+                                    requests.get(
+                                        match[1],
+                                        allow_redirects=True).content)
+                    with open(REPO_VERSION_FILE, 'w') as json_file:
+                        json.dump(save_vers, json_file)
                 else:
                     raise MissingRepoTemplateError
 
-if __name__ == "__main__":
-    print(
 
-        "Miscellaneous Aptly Tools Copyright (C) 2021 Eli Array Minkoff\n" +
-        "This program comes with ABSOLUTELY NO WARRANTY; " +
-        "This is free software, and you are welcome to redistribute"  +
-        "it under certain conditions; for details, " +
-        "see the GNU General Public Licence version 3, " + 
-        "available in the LICENCE file that should have come with this."
-    )
+if __name__ == "__main__":
+    print("Miscellaneous Aptly Tools Copyright (C) 2021 Eli Array Minkoff\n" +
+          "This program comes with ABSOLUTELY NO WARRANTY; " +
+          "This is free software, and you are welcome to redistribute" +
+          "it under certain conditions; for details, " +
+          "see the GNU General Public Licence version 3, " +
+          "available in the LICENCE file that should have come with this.")
     bulk_download()
