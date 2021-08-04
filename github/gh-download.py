@@ -26,19 +26,11 @@ SCRIPT_ROOT = Path.cwd()
 DEB_DIR = Path('..', 'debs')
 # Pattern for Github API calls
 API_TEMPLATE = "https://api.github.com/repos/{}/releases/latest"
-# Path for patterns
-REPO_DL_TEMPLATES = SCRIPT_ROOT.joinpath("gh-repo-patterns")
-REPO_VERSION_FILE = SCRIPT_ROOT.joinpath("gh-repo-saved-versions.json")
 # This regex is not exhaustive, but it's a good sanity check
 REPO_NAME_REGEX = re.compile('^[a-zA-Z0-9_\-\.]+/[a-zA-Z0-9\-_\.]+$')
 
 
 # Custom errors
-class MissingRepoPatternError(OSError):
-    """Raised if repo pattern is missing"""
-    pass
-
-
 class BadRepoNameError(ValueError):
     """Raised if the repo name fails the REPO_NAME_REGEX check"""
     pass
@@ -121,31 +113,8 @@ def get_pattern_match(pattern_string, release_info, version_regex):
         raise BadPatternError(f"no match for pattern {pattern_string}")
 
 
-def version_exists(repo, version, saved_versions):
-    """Check if the version has already been downloaded:
-    Args:
-        repo: str - the name of the Github repository
-        version: str - the version identifier
-        saved_versions: dict - the saved versions info from REPO_VERSION_FILE
-    """
-    if repo in saved_versions.keys():
-        if version in saved_versions[repo]:
-            return True
-        else:
-            saved_versions[repo].append(version)
-    else:
-        saved_versions[repo] = [version]
-    return False
-
-
 def get_new():
-    if not DEB_DIR.is_dir():
-        DEB_DIR.mkdir(parents=True)
-    if REPO_VERSION_FILE.is_file():
-        with open(REPO_VERSION_FILE, "r") as json_file:
-            save_vers = json.load(json_file)
-    else:
-        save_vers = {}
+    """Download all new files"""
     with open("gh-repos.json", 'r') as repo_conf_file:
         repo_conf = json.load(repo_conf_file)
     for repo in repo_conf.keys():
@@ -154,21 +123,27 @@ def get_new():
             raise BadRepoListNameError('Bad Github Repo: ' + repo)
         version_regex = repo_conf[repo]['regex']
         patterns = repo_conf[repo]['patterns']
+        if 'versions' not in repo_conf[repo].keys():
+            repo_conf[repo]['versions'] = []
+        existing_versions = repo_conf[repo]['versions']
         # load json info
         release_info = get_latest_release_info(repo)
         version = release_info['version']
         # check if version is already known
-        if not version_exists(repo, version, save_vers):
+        if version not in existing_versions:
+            existing_versions.append(version)
             # download all files matching patterns
             for pattern_str in patterns:
                 match = get_pattern_match(
-                    pattern_str, release_info, version_regex)
+                    pattern_str, release_info, version_regex
+                )
                 with open(DEB_DIR.joinpath(match[0]), 'wb') as debfile:
                     debfile.write(
-                        requests.get(match[1],allow_redirects=True).content
+                        requests.get(match[1], allow_redirects=True).content
                     )
-    with open(REPO_VERSION_FILE, 'w') as json_file:
-        json.dump(save_vers, json_file)
+    # Save updated information to gh-repos.json
+    with open('gh-repos.json', 'w') as json_file:
+        json.dump(repo_conf, json_file, indent=4)
 
 
 if __name__ == "__main__":
@@ -178,4 +153,6 @@ if __name__ == "__main__":
           "it under certain conditions; for details, " +
           "see the GNU General Public Licence version 3, " +
           "available in the LICENCE file that should have come with this.")
+    if not DEB_DIR.is_dir():
+        DEB_DIR.mkdir(parents=True)
     get_new()
