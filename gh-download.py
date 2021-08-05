@@ -23,7 +23,8 @@ from pathlib import Path
 
 # Declare Constants
 SCRIPT_ROOT = Path.cwd()
-DEB_DIR = Path('..', 'debs')
+DEB_DIR = Path('debs')
+CONF_FILE = Path('confs', 'gh-repos.json')
 # Pattern for Github API calls
 API_TEMPLATE = "https://api.github.com/repos/{}/releases/latest"
 # This regex is not exhaustive, but it's a good sanity check
@@ -119,7 +120,7 @@ def get_new(verbose=False):
         if verbose:
             print(("    " * indent) + str(message))
     report("Loading configuration from gh-repos.json")
-    with open("gh-repos.json", 'r') as repo_conf_file:
+    with open(CONF_FILE, 'r') as repo_conf_file:
         repo_conf = json.load(repo_conf_file)
     report("Loaded configuration", 1)
     for repo in repo_conf:
@@ -147,12 +148,12 @@ def get_new(verbose=False):
                     pattern_str, release_info, version_regex
                 )
                 with open(DEB_DIR.joinpath(match[0]), 'wb') as debfile:
-                    report(f"Downloading file {match[0]} to ../debs", 2)
+                    report(f"Downloading file {match[0]} to ./debs", 2)
                     debfile.write(
                         requests.get(match[1], allow_redirects=True).content
                     )
     # Save updated information to gh-repos.json
-    with open('gh-repos.json', 'w') as json_file:
+    with open(CONF_FILE, 'w') as json_file:
         report(f"Writing updated info to gh-repos.json")
         json.dump(repo_conf, json_file, indent=4)
 

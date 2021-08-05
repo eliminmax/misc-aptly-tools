@@ -7,7 +7,8 @@ from pathlib import Path
 import json
 
 SCRIPT_DIR = Path.cwd()
-DEB_DIR = Path('..', 'debs')
+DEB_DIR = Path('debs')
+CONF_FILE = Path('confs', 'static-urls.json')
 
 
 def download_latest(package_name, url, previous_md5, verbose):
@@ -33,7 +34,7 @@ def download_latest(package_name, url, previous_md5, verbose):
     with open(DEB_DIR.joinpath(package_name + '.deb'), 'wb') as debfile:
         if(verbose):
             print("        MD5 digest differs,",
-                  f"saving new file to ../debs/{package_name}.deb")
+                  f"saving new file to ./debs/{package_name}.deb")
         debfile.write(dl.content)
     return new_md5
 
@@ -43,7 +44,7 @@ def get_new(verbose=False):
     def report(message, indent=0):
         if verbose:
             print(("    " * indent) + str(message))
-    with open('package_urls.json', 'r') as package_url_json:
+    with open(CONF_FILE, 'r') as package_url_json:
         report('Loading configuration from package_urls.json')
         packages = json.load(package_url_json)
     report("Loaded configuration", 1)
@@ -56,7 +57,7 @@ def get_new(verbose=False):
         package['md5'] = download_latest(package_name, url,
                                          previous_md5, verbose)
         report(f"New md5 digest: {package['md5']}", 2)
-    with open('package_urls.json', 'w') as package_url_json:
+    with open(CONF_FILE, 'w') as package_url_json:
         json.dump(packages, package_url_json, indent=4)
 
 
