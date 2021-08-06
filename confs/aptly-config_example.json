@@ -1,0 +1,11 @@
+{
+    "gpg": {
+        "gpg-key": "59416F3A",
+        "keyring": "/path/to/aptly/pubring.gpg",
+        "secret-keyring": "/path/to/aptly/secring.gpg"
+    },
+    "repo": "mat-repo",
+    "distribution": "generic",
+    "component": "main",
+    "publish": "mat-publish"
+}
