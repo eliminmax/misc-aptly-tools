@@ -63,13 +63,13 @@ def _publish_new_packages(repo, to_add, pub, dist, gpg_conf, comp):
     if pub not in existing_pubs:
         subprocess.run(
             [APTLY_COMMAND, 'publish', 'repo', '-batch',
-             f'-component="{comp}"', *gpg_flags, repo],
+             f'-component="{comp}"', *gpg_flags, repo, pub],
             check=True
         )
     else:
         subprocess.run(
             [APTLY_COMMAND, 'publish', 'update',
-             '-batch', *gpg_flags, repo, pub],
+             '-batch', *gpg_flags, pub],
             check=True
         )
 
