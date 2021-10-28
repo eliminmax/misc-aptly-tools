@@ -44,7 +44,7 @@ def _publish_new_packages(repo, to_add, pub, dist, gpg_conf, comp):
         capture_output=True, check=True
     ).stdout.decode().strip().split('\n')
     
-    if existing_pub_list:
+    if existing_pub_list and len(existing_pub_list):
         existing_pubs = [p.split(' ')[1] for p in existing_pub_list] 
     else:
         existing_pubs = []
@@ -56,8 +56,8 @@ def _publish_new_packages(repo, to_add, pub, dist, gpg_conf, comp):
             check=True
         )
     # add directory to repo
-    subprocess.run([APTLY_COMMAND, 'repo', 'add', '-remove-files', repo, to_add
-                   ], check=True)
+    subprocess.run([APTLY_COMMAND, 'repo', 'add', '-force-replace',
+                    '-remove-files', repo, to_add], check=True)
     
     # publish repo if not already published, otherwise update publish
     if pub not in existing_pubs:
@@ -68,7 +68,7 @@ def _publish_new_packages(repo, to_add, pub, dist, gpg_conf, comp):
         )
     else:
         subprocess.run(
-            [APTLY_COMMAND, 'publish', 'update',
+            [APTLY_COMMAND, 'publish', 'update', '-force-overwrite',
              '-batch', *gpg_flags, pub],
             check=True
         )
