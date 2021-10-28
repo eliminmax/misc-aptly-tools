@@ -21,3 +21,4 @@ I made this because I wanted to be able to use `apt update` and `apt upgrade` to
 
 ### Github:
 * [x] use a less hacked-together system than the current one to handle determining which files to download and add to the repository
+* [ ] use an even less hacked-together system than the one created for the previous checklist item
