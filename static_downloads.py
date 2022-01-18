@@ -43,7 +43,7 @@ def download_latest(package_name, url, previous_md5, verbose):
     dl = requests.get(url, allow_redirects=True)
     new_md5 = hashlib.md5(dl.content).hexdigest()
     if not dl.ok:
-        raise Exception # TODO: More specific error
+        raise Exception  # TODO: More specific error
     if previous_md5 == new_md5:
         # cuts off here if it's the same digest
         return previous_md5
@@ -85,4 +85,3 @@ if __name__ == '__main__':
           "see the GNU General Public Licence version 3, " +
           "available in the LICENCE file that should have come with this.")
     get_new(verbose=True)
-

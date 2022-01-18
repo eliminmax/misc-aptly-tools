@@ -17,21 +17,17 @@ This script is a part of Miscellaneous Aptly Tools
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 from pathlib import Path
-from sys import stderr
 
 import gh_downloads
 import static_downloads
 import publisher
 
+from misc_aptly_tool_util import eprint
+
 DEB_DIR = Path('debs')
 
 
-def eprint(*a):
-    """Print to stderr"""
-    print(*a, file=stderr)
-
-
-if __name__ == '__main__':
+def main():
     print("Miscellaneous Aptly Tools Copyright (C) 2021 Eli Array Minkoff\n" +
           "This program comes with ABSOLUTELY NO WARRANTY; " +
           "This is free software, and you are welcome to redistribute" +
@@ -51,3 +47,7 @@ if __name__ == '__main__':
         eprint("\n\nError getting the latest static url downloads:")
         eprint(e)
     publisher.publish()
+
+
+if __name__ == "__main__":
+    main()

@@ -22,6 +22,8 @@ import json
 import sys
 from pathlib import Path
 
+from misc_aptly_tool_util import eprint
+
 # Declare Constants
 SCRIPT_ROOT = Path.cwd()
 DEB_DIR = Path('debs')
@@ -29,7 +31,7 @@ CONF_FILE = Path('confs', 'gh-repos.json')
 # Pattern for Github API calls
 API_TEMPLATE = "https://api.github.com/repos/{}/releases/latest"
 # This regex is not exhaustive, but it's a good sanity check
-REPO_NAME_REGEX = re.compile('^[a-zA-Z0-9_\-\.]+/[a-zA-Z0-9\-_\.]+$')
+REPO_NAME_REGEX = re.compile('^[a-zA-Z0-9_\\-\\.]+/[a-zA-Z0-9\\-_\\.]+$')
 
 
 # Custom errors
@@ -43,18 +45,9 @@ class GHRepoError(ValueError):
     pass
 
 
-class BadPatternError(ValueError):
+class UnmatchedPatternError(ValueError):
     """Raised if none of the downloadable files matched a pattern"""
     pass
-
-def eprint(*args):
-    """Print *args to STDERR"""
-    colorise = (__name__ == "__main__")
-    ANSI_ERR = "\033[1;31m" if colorise else '' # Bold red ANSI escape sequence
-    ANSI_RESET = "\033[00m" if colorise else '' # Reset ANSI formatting
-    print(ANSI_ERR, end='', file=sys.stderr)
-    print(*args, end='', file=sys.stderr)
-    print(ANSI_RESET, file=sys.stderr)
 
 
 def get_latest_release_info(repo):
@@ -113,7 +106,7 @@ def get_pattern_match(pattern_string, release_info, version_regex):
         Returns:
         str - the URL of the download
     Raises:
-        BadPatternError if no match exists
+        UnmatchedPatternError if no match exists
     """
     version = re.search(version_regex, release_info['version']).group(1)
     for dl in release_info['dl']:
@@ -121,7 +114,7 @@ def get_pattern_match(pattern_string, release_info, version_regex):
             return dl
     else:
         # Will run if no match found
-        raise BadPatternError(f"no match for pattern {pattern_string}")
+        raise UnmatchedPatternError(f"no match for pattern {pattern_string}")
 
 
 def get_new(verbose=False):
@@ -138,8 +131,8 @@ def get_new(verbose=False):
         # throw an error if it doesn't match the regex for github repos
         try:
             if not REPO_NAME_REGEX.match(repo):
-                raise BadRepoListNameError('Bad Github Repo: ' + repo)
-        except BadRepoListNameError as error:
+                raise BadRepoNameError('Bad Github Repo: ' + repo)
+        except BadRepoNameError as error:
             eprint(error)
             continue
         version_regex = repo_conf[repo]['regex']
@@ -158,9 +151,13 @@ def get_new(verbose=False):
             existing_versions.append(version)
             # download all files matching patterns
             for pattern_str in patterns:
-                match = get_pattern_match(
-                    pattern_str, release_info, version_regex
-                )
+                try:
+                    match = get_pattern_match(
+                        pattern_str, release_info, version_regex
+                    )
+                except UnmatchedPatternError as error:
+                    eprint(error)
+                    continue
                 with open(DEB_DIR.joinpath(match[0]), 'wb') as debfile:
                     report(f"Downloading file {match[0]} to ./debs", 2)
                     debfile.write(
@@ -182,4 +179,3 @@ if __name__ == "__main__":
     if not DEB_DIR.is_dir():
         DEB_DIR.mkdir(parents=True)
     get_new(verbose=True)
-
