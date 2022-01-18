@@ -25,6 +25,6 @@ def eprint(*args):
     colorise = 'NO_COLOR' not in environ.keys()
     ANSI_ERR = "\033[1;31m" if colorise else ''
     ANSI_RESET = "\033[00m" if colorise else ''  # Reset ANSI formatting
-    print(ANSI_ERR, end='', file=sys.stderr)
-    print(*args, end='', file=sys.stderr)
-    print(ANSI_RESET, file=sys.stderr)
+    print(ANSI_ERR, end='', file=stderr)
+    print(*args, end='', file=stderr)
+    print(ANSI_RESET, file=stderr)
