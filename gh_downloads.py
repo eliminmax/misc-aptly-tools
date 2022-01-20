@@ -40,7 +40,7 @@ class BadRepoNameError(ValueError):
     pass
 
 
-class GHRepoError(ValueError):
+class GHAPIError(ValueError):
     """Raised if a Github API call returns an error"""
     pass
 
@@ -61,14 +61,14 @@ def get_latest_release_info(repo):
         the download URL
 
     Raises:
-        GHRepoError:
+        GHAPIError:
             if the API call returns an error code
 
     """
     api_call = requests.get(API_TEMPLATE.format(repo))
     # Make sure that the API call was successful
     if not api_call.ok:
-        raise GHRepoError('Error with Github API call\n' +
+        raise GHAPIError('Error with Github API call\n' +
                           'HTTP status code: {}\n'.format(api_call.status_code)
                           + 'HTTP reason: {}'.format(api_call.reason))
     # get a dict from the api call output
