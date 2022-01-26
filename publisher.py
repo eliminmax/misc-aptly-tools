@@ -90,3 +90,7 @@ def publish(deb_dir=Path('debs')):
         aptly_config['gpg'] if 'gpg' in aptly_config else {},
         aptly_config['component'] if 'component' in aptly_config else 'main'
     )
+
+
+if __name__ == '__main__':
+    publish()
