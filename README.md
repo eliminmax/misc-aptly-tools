@@ -6,19 +6,15 @@ I made this because I wanted to be able to use `apt update` and `apt upgrade` to
 
 **THIS SOFTWARE IS IN AN ALPHA STATE, AND SHOULD NOT BE USED IN ANY PRODUCTION ENVIRONMENT!**
 
-**`static-url/package_urls.json`:** reads a list of static urls for deb packages, and downloads them, adding them if their md5 sum differs from the most recent one for the software
-
-**`github/gh-download.py`**: reads a list of repositories from {git-root}/githugh-repos.json, uses the Github API and the `json` library to parse the list of downloadable `.deb` files in the latest release, and downloads new files to {git-root}/debs
-
+For usage instructions, see Instructions.md
 ## TODO:
 
 ### General: 
 * [x] automatically import downloaded .debs to aptly and update the published apt repo
 * [x] rewrite helpers in python, because it's much easier to improve/maintain than shell scripts
 * [ ] create a command-line configuration editor
-* [ ] write proper documentation - *in progress*
+* [x] write proper documentation
 * [ ] more graceful error handling - *in progress*
-
 ### Github:
 * [x] use a less hacked-together system than the current one to handle determining which files to download and add to the repository
 * [ ] use an even less hacked-together system than the one created for the previous checklist item
