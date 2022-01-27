@@ -49,8 +49,8 @@ def _publish_new_packages(repo, to_add, pub, dist, gpg_conf, comp):
     # create repo if it does not exist yet
     if repo not in existing_repos:
         subprocess.run(
-            [APTLY_COMMAND, 'repo', 'create', f'-component="{comp}"',
-             f'-distribution="{dist}"', repo],
+            [APTLY_COMMAND, 'repo', 'create', f'-component={comp}',
+             f'-distribution={dist}', repo],
             check=True
         )
     # add directory to repo
@@ -61,7 +61,7 @@ def _publish_new_packages(repo, to_add, pub, dist, gpg_conf, comp):
     if pub not in existing_pubs:
         subprocess.run(
             [APTLY_COMMAND, 'publish', 'repo', '-batch',
-             f'-component="{comp}"', *gpg_flags, repo, pub],
+             f'-component={comp}', *gpg_flags, repo, pub],
             check=True
         )
     else:
