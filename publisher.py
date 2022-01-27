@@ -34,15 +34,13 @@ def _publish_new_packages(repo, to_add, pub, dist, gpg_conf, comp):
     gpg_flags = [f"-{flag}={gpg_conf[flag]}" for flag in gpg_conf]
 
     # check if aptly repo and publish exist or not
-    existing_repos = subprocess.run(
-        [APTLY_COMMAND, 'repo', 'list', '-raw'],
-        capture_output=True, check=True
-    ).stdout.decode().strip().split('\n')
+    existing_repos = subprocess.check_output(
+        [APTLY_COMMAND, 'repo', 'list', '-raw']
+    ).decode().strip().splitlines()
 
-    existing_pub_list = subprocess.run(
-        [APTLY_COMMAND, 'publish', 'list', '-raw'],
-        capture_output=True, check=True
-    ).stdout.decode().strip().split('\n')
+    existing_pub_list = subprocess.check_output(
+        [APTLY_COMMAND, 'publish', 'list', '-raw']
+    ).decode().strip().splitlines()
 
     if existing_pub_list and len(existing_pub_list):
         existing_pubs = [p.split(' ')[1] for p in existing_pub_list]
