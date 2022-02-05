@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "misc-aptly-tools"
+version = "0.1.0"
+description = "Misc. tools to automatically manage an apt repository using aptly"
+authors = ["Eli Array Minkoff <e.array.minkoff@pm.me>"]
+license = "GPL-3.0-only"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+requests = "^2.25.1"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
