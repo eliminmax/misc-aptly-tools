@@ -43,7 +43,7 @@ def _publish_new_packages(repo, to_add, pub, dist, gpg_conf, comp):
     ).decode().strip().splitlines()
 
     if existing_pub_list and len(existing_pub_list):
-        existing_pubs = [p.split(' ')[0] for p in existing_pub_list]
+        existing_pubs = [p.split(' ')[1] for p in existing_pub_list]
     else:
         existing_pubs = []
     # create repo if it does not exist yet
