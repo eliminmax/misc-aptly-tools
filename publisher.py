@@ -67,7 +67,7 @@ def _publish_new_packages(repo, to_add, pub, dist, gpg_conf, comp):
     else:
         subprocess.run(
             [APTLY_COMMAND, 'publish', 'update', '-force-overwrite',
-             '-batch', *gpg_flags, pub],
+             '-batch', *gpg_flags, dist, pub],
             check=True
         )
 
