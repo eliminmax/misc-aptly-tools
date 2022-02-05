@@ -61,13 +61,13 @@ def _publish_new_packages(repo, to_add, pub, dist, gpg_conf, comp):
     if pub not in existing_pubs:
         subprocess.run(
             [APTLY_COMMAND, 'publish', 'repo', '-batch',
-             f'-component={comp}', *gpg_flags, repo, pub, dist],
+             f'-component={comp}', *gpg_flags, repo, pub],
             check=True
         )
     else:
         subprocess.run(
             [APTLY_COMMAND, 'publish', 'update', '-force-overwrite',
-             '-batch', *gpg_flags, pub, dist],
+             '-batch', *gpg_flags, pub],
             check=True
         )
 
@@ -76,7 +76,7 @@ def publish(deb_dir=Path('debs')):
     """Publish all new packages
 
     Params:
-        deb_dir: pathlib.Path: the directory for debs to add
+        deb_dir: pathlib.Path: the directory of debs to add
             defaults to ./debs)
     """
     aptly_config = _load_conf()
