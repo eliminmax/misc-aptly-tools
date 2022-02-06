@@ -50,8 +50,7 @@ def check_deb_file_versions(verbose=False):
             existing_deb_info.append(deb_info)
 
     # Save new version of EXISTING_DEBS_FILE
-    with open(EXISTING_DEBS_FILE, 'w') as f:
-        json.dump(existing_deb_info, EXISTING_DEBS_FILE)
+    EXISTING_DEBS_FILE.write_text(json.dumps(existing_deb_info))
 
 
 # if called directly, run check_deb_file_versions()
