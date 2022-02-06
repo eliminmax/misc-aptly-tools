@@ -46,7 +46,7 @@ def main():
         eprint("\n\nError getting the latest static url downloads:")
         eprint(e)
     try:
-        check_package_versions(verbose=True)
+        check_package_versions.check_deb_file_versions(verbose=True)
     except Exception as e:
         eprint("\n\nError checking the package versions:")
         eprint(e)
