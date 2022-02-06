@@ -21,10 +21,9 @@ from pathlib import Path
 import gh_downloads
 import static_downloads
 import publisher
-
+import check_package_versions
 from misc_aptly_tool_util import eprint
-
-DEB_DIR = Path('debs')
+from misc_aptly_tool_util import DEB_DIR
 
 
 def main():
@@ -46,7 +45,14 @@ def main():
     except Exception as e:
         eprint("\n\nError getting the latest static url downloads:")
         eprint(e)
-    publisher.publish()
+    try:
+        check_package_versions(verbose=True)
+    except Exception as e:
+        eprint("\n\nError checking the package versions:")
+        eprint(e)
+    # if packages are in deb_dir, add them
+    if DEB_DIR.glob('*'):
+        publisher.publish()
 
 
 if __name__ == "__main__":
