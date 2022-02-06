@@ -156,7 +156,7 @@ def get_new(verbose=False):
                     dl = get_pattern_match(
                         pattern_str, release_info, version_regex
                     )
-                    download(*dl)
+                    download(dl[1], DEB_DIR.joinpath(dl[0]))
                 except UnmatchedPatternError as error:
                     eprint(error)
                     continue

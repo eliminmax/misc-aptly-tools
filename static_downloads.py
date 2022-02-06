@@ -40,7 +40,7 @@ def get_new(verbose=False):
     report("Loaded configuration", 1)
     for package_name in packages:
         report(f'Working on package {package_name}')
-        package = DEB_DIR.join(packages[package_name]+'.deb')
+        package = DEB_DIR.joinpath(packages[package_name]+'.deb')
         url = package['url']
         download(url, package)
 
