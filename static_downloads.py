@@ -16,9 +16,6 @@ This script is a part of Miscellaneous Aptly Tools
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import requests
-import hashlib
-import os
 from pathlib import Path
 import json
 

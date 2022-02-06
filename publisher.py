@@ -18,10 +18,11 @@ This script is a part of Miscellaneous Aptly Tools
 """
 import json
 import subprocess
-from pathlib import Path
 
-APTLY_COMMAND = '/usr/bin/aptly'
-SCRIPT_DIR = Path.cwd()
+from misc_aptly_tool_util import DEB_DIR
+from misc_aptly_tool_util import SCRIPT_DIR
+
+APTLY_COMMAND = 'aptly'
 
 
 def _load_conf():
@@ -72,17 +73,12 @@ def _publish_new_packages(repo, to_add, pub, dist, gpg_conf, comp):
         )
 
 
-def publish(deb_dir=Path('debs')):
-    """Publish all new packages
-
-    Params:
-        deb_dir: pathlib.Path: the directory of debs to add
-            defaults to ./debs)
-    """
+def publish():
+    """Publish all new packages"""
     aptly_config = _load_conf()
     _publish_new_packages(
         aptly_config['repo'],
-        str(deb_dir.resolve()),
+        str(DEB_DIR.resolve()),
         aptly_config['publish'],
         aptly_config['distribution'],
         aptly_config['gpg'] if 'gpg' in aptly_config else {},

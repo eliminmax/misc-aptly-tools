@@ -17,7 +17,11 @@ This script is a part of Miscellaneous Aptly Tools
 """
 from sys import stderr
 from os import environ
+from pathlib import Path
 import requests
+
+SCRIPT_DIR = Path.cwd()
+DEB_DIR = SCRIPT_DIR.joinpath('debs')
 
 
 def eprint(*args):

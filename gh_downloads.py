@@ -19,15 +19,14 @@ This script is a part of Miscellaneous Aptly Tools
 import requests
 import re
 import json
-import sys
 from pathlib import Path
 
 from misc_aptly_tool_util import eprint
 from misc_aptly_tool_util import download
+from misc_aptly_tool_util import DEB_DIR
+
 
 # Declare Constants
-SCRIPT_ROOT = Path.cwd()
-DEB_DIR = Path('debs')
 CONF_FILE = Path('confs', 'gh-repos.json')
 # Pattern for Github API calls
 API_TEMPLATE = "https://api.github.com/repos/{}/releases/latest"
@@ -162,7 +161,7 @@ def get_new(verbose=False):
                     continue
     # Save updated information to gh-repos.json
     with open(CONF_FILE, 'w') as json_file:
-        report(f"Writing updated info to gh-repos.json")
+        report("Writing updated info to gh-repos.json")
         json.dump(repo_conf, json_file, indent=4)
 
 
