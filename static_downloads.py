@@ -41,7 +41,7 @@ def get_new(verbose=False):
     for package_name in packages:
         report(f'Working on package {package_name}')
         package = DEB_DIR.joinpath(package_name+'.deb')
-        url = package['url']
+        url = packages[package_name]['url']
         download(url, package)
 
 
