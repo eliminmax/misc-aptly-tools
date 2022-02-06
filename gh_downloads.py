@@ -23,6 +23,7 @@ import sys
 from pathlib import Path
 
 from misc_aptly_tool_util import eprint
+from misc_aptly_tool_util import download
 
 # Declare Constants
 SCRIPT_ROOT = Path.cwd()
