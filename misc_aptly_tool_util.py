@@ -17,14 +17,25 @@ This script is a part of Miscellaneous Aptly Tools
 """
 from sys import stderr
 from os import environ
+import requests
 
 
 def eprint(*args):
     """Print *args to STDERR"""
     # Bold red ANSI escape sequence
     colorise = 'NO_COLOR' not in environ.keys()
-    ANSI_ERR = "\033[1;31m" if colorise else ''
+    ANSI_ERR = "\033[1;31m" if colorise else ''  # colors text red
     ANSI_RESET = "\033[00m" if colorise else ''  # Reset ANSI formatting
     print(ANSI_ERR, end='', file=stderr)
     print(*args, end='', file=stderr)
     print(ANSI_RESET, file=stderr)
+
+
+def download(uri, destination):
+    """download file from uri to destination, without exhausting memory"""
+    with requests.get(uri, stream=True, allow_redirects=True) as r:
+        r.raise_for_status()
+        with open(destination, 'wb') as f:
+            for segment in r.iter_content(4096):
+                if segment:
+                    f.write(segment)

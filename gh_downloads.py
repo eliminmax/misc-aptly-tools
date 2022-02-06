@@ -69,8 +69,8 @@ def get_latest_release_info(repo):
     # Make sure that the API call was successful
     if not api_call.ok:
         raise GHAPIError('Error with Github API call\n' +
-                          'HTTP status code: {}\n'.format(api_call.status_code)
-                          + 'HTTP reason: {}'.format(api_call.reason))
+                         'HTTP status code: {}\n'.format(api_call.status_code)
+                         + 'HTTP reason: {}'.format(api_call.reason))
     # get a dict from the api call output
     api_json = api_call.json()
     # get the release name and all downloadable assets into a dict to return
@@ -152,17 +152,13 @@ def get_new(verbose=False):
             # download all files matching patterns
             for pattern_str in patterns:
                 try:
-                    match = get_pattern_match(
+                    uri = get_pattern_match(
                         pattern_str, release_info, version_regex
                     )
+                    download(uri, uri.split('/')[-1])
                 except UnmatchedPatternError as error:
                     eprint(error)
                     continue
-                with open(DEB_DIR.joinpath(match[0]), 'wb') as debfile:
-                    report(f"Downloading file {match[0]} to ./debs", 2)
-                    debfile.write(
-                        requests.get(match[1], allow_redirects=True).content
-                    )
     # Save updated information to gh-repos.json
     with open(CONF_FILE, 'w') as json_file:
         report(f"Writing updated info to gh-repos.json")

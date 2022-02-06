@@ -22,37 +22,11 @@ import os
 from pathlib import Path
 import json
 
+from misc_aptly_tool_util import download
+
 SCRIPT_DIR = Path.cwd()
 DEB_DIR = Path('debs')
 CONF_FILE = Path('confs', 'static-urls.json')
-
-
-def download_latest(package_name, url, previous_md5, verbose):
-    """Download the latest .deb; check it against the existing one
-    Args:
-        package_name: str - the name of the package
-        url: str - the url of the package download
-        previous_md5: str - the previous download's md5 digest, empty for
-            first download
-        verbose: bool - whether or not to print info about what it's doing
-    Returns:
-        str - the md5 of the new download
-    """
-    if not DEB_DIR.is_dir():
-        DEB_DIR.mkdir(parents=True)
-    dl = requests.get(url, allow_redirects=True)
-    new_md5 = hashlib.md5(dl.content).hexdigest()
-    if not dl.ok:
-        raise Exception  # TODO: More specific error
-    if previous_md5 == new_md5:
-        # cuts off here if it's the same digest
-        return previous_md5
-    with open(DEB_DIR.joinpath(package_name + '.deb'), 'wb') as debfile:
-        if(verbose):
-            print("        MD5 digest differs,",
-                  f"saving new file to ./debs/{package_name}.deb")
-        debfile.write(dl.content)
-    return new_md5
 
 
 def get_new(verbose=False):
@@ -66,15 +40,9 @@ def get_new(verbose=False):
     report("Loaded configuration", 1)
     for package_name in packages:
         report(f'Working on package {package_name}')
-        package = packages[package_name]
+        package = DEB_DIR.join(packages[package_name]+'.deb')
         url = package['url']
-        previous_md5 = package['md5'] if 'md5' in package else ''
-        report(f"Previous download md5 digest: {previous_md5}", 1)
-        package['md5'] = download_latest(package_name, url,
-                                         previous_md5, verbose)
-        report(f"New md5 digest: {package['md5']}", 2)
-    with open(CONF_FILE, 'w') as package_url_json:
-        json.dump(packages, package_url_json, indent=4)
+        download(url, package)
 
 
 if __name__ == '__main__':
