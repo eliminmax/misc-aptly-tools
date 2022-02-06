@@ -12,7 +12,7 @@ from misc_aptly_tool_util import eprint
 from misc_aptly_tool_util import SCRIPT_DIR
 
 
-def check_deb_file_versions():
+def check_deb_file_versions(verbose=False):
     """Check metadata for all packages in DEB_DIR against existing versions
     """
     # If ./info/existing.json exists, load it in.
@@ -22,13 +22,15 @@ def check_deb_file_versions():
             try:
                 existing_deb_info = json.load(f)
             except json.decoder.JSONDecodeError as err:
-                eprint("Error parsing JSON from ./info/existing.json:", err)
+                if verbose:
+                    eprint("Error parsing ./info/existing.json:", err)
                 existing_deb_info = list()
         # If loaded
         if not type(existing_deb_info) == list:
-            eprint("./info/existing.json was valid JSON,",
-                   "but was not imported as a list.",
-                   "Creating an empty list to use")
+            if verbose:
+                eprint("./info/existing.json was valid JSON,",
+                       "but was not imported as a list.",
+                       "Creating an empty list to use")
             del existing_deb_info
             existing_deb_info = list()
     else:
@@ -54,4 +56,4 @@ def check_deb_file_versions():
 
 # if called directly, run check_deb_file_versions()
 if __name__ == '__main__':
-    check_deb_file_versions()
+    check_deb_file_versions(verbose=True)
