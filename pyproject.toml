@@ -8,6 +8,7 @@ license = "GPL-3.0-only"
 [tool.poetry.dependencies]
 python = "^3.9"
 requests = "^2.25.1"
+pydpkg = "^1.6.0"
 
 [tool.poetry.dev-dependencies]
 
