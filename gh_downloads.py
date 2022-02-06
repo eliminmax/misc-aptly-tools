@@ -153,10 +153,10 @@ def get_new(verbose=False):
             # download all files matching patterns
             for pattern_str in patterns:
                 try:
-                    uri = get_pattern_match(
+                    dl = get_pattern_match(
                         pattern_str, release_info, version_regex
                     )
-                    download(uri, uri.split('/')[-1])
+                    download(*dl)
                 except UnmatchedPatternError as error:
                     eprint(error)
                     continue
