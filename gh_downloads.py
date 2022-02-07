@@ -106,18 +106,15 @@ def get_new(verbose=False):
         except BadRepoNameError as error:
             eprint(error)
             continue
-        if 'versions' not in repo_conf[repo]:
-            repo_conf[repo]['versions'] = []
         # ensure the assets data exist in the proper format, otherwise add it
-        if version not in existing_version_data.keys():
-            existing_version_data[version] = {}
-        elif type(version) == list:
-            del existing_version_data[version]
-            existing_version_data[version] = {}
-        else:
-            existing_version_data = repo_conf[repo]['versions']
+        if type(repo_conf[repo]['versions']) == list:
+            del repo_conf[repo]['versions']
+            repo_conf[repo]['versions'] = {}
+        elif 'versions' not in repo_conf[repo].keys():
+            repo_conf[repo]['versions'] = {}
+        existing_versions_data = repo_conf[repo]['versions']
         report(
-            f"Existing versions: {[v for v in existing_version_data.keys()]}",
+            f"Existing versions: {[v for v in existing_versions_data.keys()]}",
             1
         )
         # load json info
@@ -125,8 +122,8 @@ def get_new(verbose=False):
         version = release_info['version']
         report(f"Latest upstream version: {version}", 1)
         for node_id, asset in release_info['assets'].items():
-            if node_id not in existing_version_data[version].keys():
-                existing_version_data[version][node_id] = asset
+            if node_id not in existing_versions_data[version].keys():
+                existing_versions_data[version][node_id] = asset
                 if asset['name'].endswith('.deb'):
                     report("Loading file: "+asset['name'], 2)
                     save_path = DEB_DIR.joinpath(asset['name'])
@@ -139,9 +136,7 @@ def get_new(verbose=False):
                         del_file(save_path)
                         report('DELETED: package name was ' +
                                deb_headers['Package'] + ', not ' +
-                               package_name
-
-
+                               package_name, 3)
 
     # Save updated information to gh-repos.json
     with open(CONF_FILE, 'w') as json_file:
