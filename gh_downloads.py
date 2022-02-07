@@ -121,9 +121,12 @@ def get_new(verbose=False):
         release_info = get_latest_release_info(repo)
         version = release_info['version']
         report(f"Latest upstream version: {version}", 1)
+        if version not in existing_versions_data.keys():
+            existing_versions_data[version] = {}
+
         for node_id, asset in release_info['assets'].items():
             if node_id not in existing_versions_data[version].keys():
-                existing_versions_data[version] = {node_id: asset}
+                existing_versions_data[version][node_id] = asset
                 if asset['name'].endswith('.deb'):
                     report("Loading file: "+asset['name'], 2)
                     save_path = DEB_DIR.joinpath(asset['name'])
