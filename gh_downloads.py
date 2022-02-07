@@ -123,7 +123,7 @@ def get_new(verbose=False):
         report(f"Latest upstream version: {version}", 1)
         for node_id, asset in release_info['assets'].items():
             if node_id not in existing_versions_data[version].keys():
-                existing_versions_data[node_id] = asset
+                existing_versions_data[version] = {node_id: asset}
                 if asset['name'].endswith('.deb'):
                     report("Loading file: "+asset['name'], 2)
                     save_path = DEB_DIR.joinpath(asset['name'])
