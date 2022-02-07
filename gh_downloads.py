@@ -107,10 +107,10 @@ def get_new(verbose=False):
             eprint(error)
             continue
         # ensure the assets data exist in the proper format, otherwise add it
-        if type(repo_conf[repo]['versions']) == list:
-            del repo_conf[repo]['versions']
+        if 'versions' not in repo_conf[repo].keys():
             repo_conf[repo]['versions'] = {}
-        elif 'versions' not in repo_conf[repo].keys():
+        elif type(repo_conf[repo]['versions']) == list:
+            del repo_conf[repo]['versions']
             repo_conf[repo]['versions'] = {}
         existing_versions_data = repo_conf[repo]['versions']
         report(
