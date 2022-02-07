@@ -137,7 +137,7 @@ def get_new(verbose=False):
                     elif deb_headers['Package'] != package_name:
                         del_file(save_path)
                         report('DELETED: package name was ' +
-                               deb_headers['Package'] + ', not' +
+                               deb_headers['Package'] + ', not ' +
                                package_name
 
 
