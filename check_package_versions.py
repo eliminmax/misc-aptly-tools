@@ -15,15 +15,15 @@ from misc_aptly_tool_util import SCRIPT_DIR
 def check_deb_file_versions(verbose=False):
     """Check metadata for all packages in DEB_DIR against existing versions
     """
-    # If ./info/existing.json exists, load it in.
-    EXISTING_DEBS_FILE = SCRIPT_DIR.joinpath("info", "existing.json")
+    # If ./confs/existing.json exists, load it in.
+    EXISTING_DEBS_FILE = SCRIPT_DIR.joinpath("confs", "existing.json")
     if EXISTING_DEBS_FILE.exists():
         with open(EXISTING_DEBS_FILE) as f:
             try:
                 existing_deb_info = json.load(f)
             except json.decoder.JSONDecodeError as err:
                 if verbose:
-                    eprint("Error parsing ./info/existing.json:", err)
+                    eprint("Error parsing ./confs/existing.json:", err)
                 existing_deb_info = list()
         # If loaded
         if not type(existing_deb_info) == list:
