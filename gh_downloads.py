@@ -16,10 +16,13 @@ This script is a part of Miscellaneous Aptly Tools
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import requests
 import re
 import json
 from pathlib import Path
+from os import remove as del_file
+
+import requests
+from pydpkg import Dpkg
 
 from misc_aptly_tool_util import eprint
 from misc_aptly_tool_util import download
@@ -57,8 +60,7 @@ def get_latest_release_info(repo):
     Returns:
         A dictionary with the relevant information extracted from the reply
         ['version']: (string) the version name for the release
-        ['dl']: a list of 2-long tuples, each of which has the filename, and
-        the download URL
+        ['assets']: (dict) {'node_id': {'name', 'uri'}} for each asset
 
     Raises:
         GHAPIError:
@@ -76,45 +78,12 @@ def get_latest_release_info(repo):
     # get the release name and all downloadable assets into a dict to return
     parsed_info = {}
     parsed_info['version'] = api_json['name']
-    dl_key = 'browser_download_url'
-    parsed_info['dl'] = [(i['name'], i[dl_key]) for i in api_json['assets']]
+    parsed_info['assets'] = {
+        a['node_id']: {
+            'name': a['name'], 'uri': a['browser_download_url']
+        } for a in api_json['assets']
+    }
     return parsed_info
-
-
-def check_pattern(pattern_string, version_name, file_name):
-    """Check if a downloadable file name matches a pattern string
-    Args:
-        pattern_string: a string with the filename, with {VERSION}
-            in place of the version name
-        version_name: the release version name/number
-        file_name: the name of the downloadable to check
-    Returns:
-        bool: True if the pattern string matches the given filename,
-            False otherwise
-    """
-    expected_file_name = pattern_string.format(VERSION=version_name)
-    return expected_file_name == file_name
-
-
-def get_pattern_match(pattern_string, release_info, version_regex):
-    """Get the url for the download that matches a pattern
-    Args:
-        pattern_string: str - pattern string to check
-        release_info: dict - output of get_latest_release_info
-        version_regex: str - regex pattern to get the part of the version
-                                in the .deb package name
-        Returns:
-        str - the URL of the download
-    Raises:
-        UnmatchedPatternError if no match exists
-    """
-    version = re.search(version_regex, release_info['version']).group(1)
-    for dl in release_info['dl']:
-        if check_pattern(pattern_string, version, dl[0]):
-            return dl
-    else:
-        # Will run if no match found
-        raise UnmatchedPatternError(f"no match for pattern {pattern_string}")
 
 
 def get_new(verbose=False):
@@ -127,6 +96,8 @@ def get_new(verbose=False):
         repo_conf = json.load(repo_conf_file)
     report("Loaded configuration", 1)
     for repo in repo_conf:
+        package_name = repo_conf[repo]['package']
+        arches = repo_conf[repo]['architectures']
         report(f"Working on repository {repo}")
         # throw an error if it doesn't match the regex for github repos
         try:
@@ -135,30 +106,42 @@ def get_new(verbose=False):
         except BadRepoNameError as error:
             eprint(error)
             continue
-        version_regex = repo_conf[repo]['regex']
-        patterns = repo_conf[repo]['patterns']
         if 'versions' not in repo_conf[repo]:
             repo_conf[repo]['versions'] = []
-        existing_versions = repo_conf[repo]['versions']
-        report(f"Existing versions: {[v for v in existing_versions]}", 1)
+        existing_version_data = repo_conf[repo]['versions']
+        report(
+            f"Existing versions: {[v for v in existing_version_data.keys()]}",
+            1
+        )
         # load json info
         release_info = get_latest_release_info(repo)
         version = release_info['version']
+        # ensure the assets data exist in the proper format
+        if version not in existing_version_data.keys():
+            existing_version_data[version] = {}
+        elif type(version) == list:
+            del existing_version_data[version]
+            existing_version_data[version] = {}
         report(f"Latest upstream version: {version}", 1)
-        # check if version is already known
-        if version not in existing_versions:
-            report("Latest upstream version is not in existing versions", 1)
-            existing_versions.append(version)
-            # download all files matching patterns
-            for pattern_str in patterns:
-                try:
-                    dl = get_pattern_match(
-                        pattern_str, release_info, version_regex
-                    )
-                    download(dl[1], DEB_DIR.joinpath(dl[0]))
-                except UnmatchedPatternError as error:
-                    eprint(error)
-                    continue
+        for node_id, asset in release_info['assets'].items():
+            if node_id not in existing_version_data[version].keys():
+                existing_version_data[version][node_id] = asset
+                if asset['name'].endswith('.deb'):
+                    report("Loading file: "+asset['name'], 2)
+                    save_path = DEB_DIR.joinpath(asset['name'])
+                    download(asset['uri'], save_path)
+                    deb_headers = Dpkg(save_path).headers
+                    if deb_headers['Architecture'] not in arches:
+                        del_file(save_path)
+                        report('DELETED: arch not in configured arches', 3)
+                    elif deb_headers['Package'] != package_name:
+                        del_file(save_path)
+                        report('DELETED: package name was ' +
+                               deb_headers['Package'] + ', not' +
+                               package_name
+
+
+
     # Save updated information to gh-repos.json
     with open(CONF_FILE, 'w') as json_file:
         report("Writing updated info to gh-repos.json")
