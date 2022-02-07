@@ -139,7 +139,9 @@ def get_new(verbose=False):
                         del_file(save_path)
                         report('DELETED: package name was ' +
                                deb_headers['Package'] + ', not ' +
-                               package_name, 3)
+                               package_name
+
+
 
     # Save updated information to gh-repos.json
     with open(CONF_FILE, 'w') as json_file:
