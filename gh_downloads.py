@@ -108,7 +108,10 @@ def get_new(verbose=False):
             continue
         if 'versions' not in repo_conf[repo]:
             repo_conf[repo]['versions'] = []
+        # load json info
+        release_info = get_latest_release_info(repo)
         # ensure the assets data exist in the proper format, otherwise add it
+        version = release_info['version']
         if version not in existing_version_data.keys():
             existing_version_data[version] = {}
         elif type(version) == list:
@@ -120,9 +123,6 @@ def get_new(verbose=False):
             f"Existing versions: {[v for v in existing_version_data.keys()]}",
             1
         )
-        # load json info
-        release_info = get_latest_release_info(repo)
-        version = release_info['version']
         report(f"Latest upstream version: {version}", 1)
         for node_id, asset in release_info['assets'].items():
             if node_id not in existing_version_data[version].keys():
