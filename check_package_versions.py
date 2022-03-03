@@ -1,6 +1,22 @@
 #!/usr/bin/env python3
 
-"""Check the versions of packages, remove if unchanged"""
+"""Check the versions of packages, remove if unchanged. Rename files if needed
+This script is a part of Miscellaneous Aptly Tools
+    Copyright (C) 2021 Eli Array Minkoff
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""
 
 import json
 from os import remove as del_file
@@ -47,6 +63,12 @@ def check_deb_file_versions(verbose=False):
         if deb_info in existing_deb_info:
             del_file(deb_file)
         else:
+            # rename file to {package}_{version}_{arch}.deb, if needed
+            name_in_repo = (f'{deb_info["Package"]}_{deb_info["Version"]}_'
+                            f'{deb_info["Architecture"]}.deb')
+            if deb_file.name != name_in_repo:
+                deb_file.rename(deb_file.parent().joinpath(name_in_repo))
+            # Add entry in existing_deb_info
             existing_deb_info.append(deb_info)
 
     # Save new version of EXISTING_DEBS_FILE
