@@ -67,7 +67,7 @@ def check_deb_file_versions(verbose=False):
             name_in_repo = (f'{deb_info["Package"]}_{deb_info["Version"]}_'
                             f'{deb_info["Architecture"]}.deb')
             if deb_file.name != name_in_repo:
-                deb_file.rename(deb_file.parent().joinpath(name_in_repo))
+                deb_file.rename(deb_file.parent.joinpath(name_in_repo))
             # Add entry in existing_deb_info
             existing_deb_info.append(deb_info)
 
