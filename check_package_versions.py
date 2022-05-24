@@ -38,8 +38,8 @@ def check_deb_file_versions(verbose=False):
         if CONF_DIR.joinpath("existing.json").exists():
             if verbose:
                 eprint(
-                    "File 'existing.json' found in {CONF_DIR}"
-                    f"moving it to {DATA_DIR}"
+                    f"File 'existing.json' found in {CONF_DIR}",
+                    f"moving it to {DATA_DIR}",
                 )
             CONF_DIR.joinpath("existing.json").rename(str(EXISTING_DEBS_FILE))
         else:
