@@ -42,7 +42,7 @@ def _publish_new_packages(repo, to_add, pub, dist, gpg_conf, comp):
     # check if aptly repo and publish exist or not
     existing_repos = _aptly("repo", "list", "-raw").splitlines()
 
-    existing_pub_list = _aptly("publish", "list", "raw").splitlines()
+    existing_pub_list = _aptly("publish", "list", "-raw").splitlines()
 
     if existing_pub_list and len(existing_pub_list):
         existing_pubs = [p.split(" ")[0] for p in existing_pub_list]
