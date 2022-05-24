@@ -31,23 +31,18 @@ def _load_conf():
     return aptly_config
 
 
+def _aptly(*args):
+    """call aptly command with given args"""
+    return subprocess.check_output([APTLY_COMMAND, *args]).decode().strip()
+
+
 def _publish_new_packages(repo, to_add, pub, dist, gpg_conf, comp):
     gpg_flags = [f"-{flag}={gpg_conf[flag]}" for flag in gpg_conf]
 
     # check if aptly repo and publish exist or not
-    existing_repos = (
-        subprocess.check_output([APTLY_COMMAND, "repo", "list", "-raw"])
-        .decode()
-        .strip()
-        .splitlines()
-    )
+    existing_repos = _aptly("repo", "list", "-raw").splitlines()
 
-    existing_pub_list = (
-        subprocess.check_output([APTLY_COMMAND, "publish", "list", "-raw"])
-        .decode()
-        .strip()
-        .splitlines()
-    )
+    existing_pub_list = _aptly("publish", "list", "raw").splitlines()
 
     if existing_pub_list and len(existing_pub_list):
         existing_pubs = [p.split(" ")[0] for p in existing_pub_list]
@@ -55,51 +50,36 @@ def _publish_new_packages(repo, to_add, pub, dist, gpg_conf, comp):
         existing_pubs = []
     # create repo if it does not exist yet
     if repo not in existing_repos:
-        subprocess.run(
-            [
-                APTLY_COMMAND,
-                "repo",
-                "create",
-                f"-component={comp}",
-                f"-distribution={dist}",
-                repo,
-            ],
-            check=True,
+        _aptly(
+            "repo",
+            "create",
+            f"-component={comp}",
+            f"-distribution={dist}",
+            repo,
         )
     # add directory to repo
-    subprocess.run(
-        [APTLY_COMMAND, "repo", "add", "-force-replace", "-remove-files", repo, to_add],
-        check=True,
-    )
+    _aptly("repo", "add", "-force-replace", "-remove-files", repo, to_add)
 
     # publish repo if not already published, otherwise update publish
     if pub not in existing_pubs:
-        subprocess.run(
-            [
-                APTLY_COMMAND,
-                "publish",
-                "repo",
-                "-batch",
-                *gpg_flags,
-                f"-component={comp}",
-                repo,
-                pub,
-            ],
-            check=True,
+        _aptly(
+            "publish",
+            "repo",
+            "-batch",
+            *gpg_flags,
+            f"-component={comp}",
+            repo,
+            pub,
         )
     else:
-        subprocess.run(
-            [
-                APTLY_COMMAND,
-                "publish",
-                "update",
-                "-force-overwrite",
-                *gpg_flags,
-                "-batch",
-                dist,
-                pub,
-            ],
-            check=True,
+        _aptly(
+            "publish",
+            "update",
+            "-force-overwrite",
+            *gpg_flags,
+            "-batch",
+            dist,
+            pub,
         )
 
 
