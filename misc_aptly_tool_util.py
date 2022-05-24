@@ -16,7 +16,6 @@ This script is a part of Miscellaneous Aptly Tools
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 from sys import stderr
-from os import environ
 from pathlib import Path
 import requests
 
