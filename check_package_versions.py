@@ -35,7 +35,7 @@ def check_deb_file_versions(verbose=False):
     # First ensure that the file exists
     if not EXISTING_DEBS_FILE.exists():
         # check old location first
-        if CONF_DIR.joinpath("existing.json"):
+        if CONF_DIR.joinpath("existing.json").exists():
             if verbose:
                 eprint(
                     "File 'existing.json' found in {CONF_DIR}"
