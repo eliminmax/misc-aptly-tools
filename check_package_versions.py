@@ -23,36 +23,55 @@ from os import remove as del_file
 
 from pydpkg import Dpkg
 
-from misc_aptly_tool_util import DEB_DIR
 from misc_aptly_tool_util import eprint
-from misc_aptly_tool_util import SCRIPT_DIR
+from misc_aptly_tool_util import CONF_DIR
+from misc_aptly_tool_util import DATA_DIR
+from misc_aptly_tool_util import DEB_DIR
 
 
 def check_deb_file_versions(verbose=False):
     """Check metadata for all packages in DEB_DIR against existing versions"""
-    # If ./confs/existing.json exists, load it in.
-    EXISTING_DEBS_FILE = SCRIPT_DIR.joinpath("confs", "existing.json")
-    if EXISTING_DEBS_FILE.exists():
-        with open(EXISTING_DEBS_FILE) as f:
-            try:
-                existing_deb_info = json.load(f)
-            except json.decoder.JSONDecodeError as err:
-                if verbose:
-                    eprint("Error parsing ./confs/existing.json:", err)
-                existing_deb_info = list()
-        # If loaded
-        if not type(existing_deb_info) == list:
+    EXISTING_DEBS_FILE = DATA_DIR.joinpath("existing.json")
+    # First ensure that the file exists
+    if not EXISTING_DEBS_FILE.exists():
+        # check old location first
+        if CONF_DIR.joinpath("existing.json"):
             if verbose:
                 eprint(
-                    "./info/existing.json was valid JSON,",
-                    "but was not imported as a list.",
-                    "Creating an empty list to use",
+                    "File 'existing.json' found in {CONF_DIR}"
+                    f"moving it to {DATA_DIR}"
                 )
-            del existing_deb_info
+            CONF_DIR.joinpath("existing.json").rename(str(EXISTING_DEBS_FILE))
+        else:
+            # If the file does not exist, make it now.
+            if verbose:
+                eprint(
+                    f"File {EXISTING_DEBS_FILE} does not exist.",
+                    "Creating it now.",
+                )
+            if not EXISTING_DEBS_FILE.parent().is_dir():
+                EXISTING_DEBS_FILE.parent().mkdir(parents=True)
+            EXISTING_DEBS_FILE.touch()
+
+    existing_deb_info = list()
+    with open(EXISTING_DEBS_FILE) as f:
+        try:
+            existing_deb_info = json.load(f)
+        except json.decoder.JSONDecodeError as err:
+            if verbose:
+                eprint(f"Error parsing {EXISTING_DEBS_FILE}:", err)
             existing_deb_info = list()
-    else:
+    # If loaded
+    if not isinstance(existing_deb_info, list):
+        if verbose:
+            eprint(
+                f"{EXISTING_DEBS_FILE} was valid JSON,",
+                "but was not imported as a list.",
+                "Creating an empty list to use",
+            )
+        del existing_deb_info
         existing_deb_info = list()
-    # Iterate over files in DEB_DIR
+        # Iterate over files in DEB_DIR
     for deb_file in DEB_DIR.glob("*.deb"):
         deb_headers = Dpkg(deb_file).headers
         deb_info = {
