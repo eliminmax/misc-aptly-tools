@@ -150,7 +150,7 @@ def get_new(verbose=False):
 if __name__ == "__main__":
     print("Miscellaneous Aptly Tools Copyright (C) 2021 Eli Array Minkoff\n" +
           "This program comes with ABSOLUTELY NO WARRANTY; " +
-          "This is free software, and you are welcome to redistribute" +
+          "This is free software, and you are welcome to redistribute " +
           "it under certain conditions; for details, " +
           "see the GNU General Public Licence version 3, " +
           "available in the LICENCE file that should have come with this.")
