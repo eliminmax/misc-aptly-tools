@@ -90,7 +90,7 @@ def get_new(verbose=False):
     """Download all new .deb packages"""
     def report(message, indent=0):
         if verbose:
-            print(("    " * indent) + str(message))
+            print(("\t" * indent) + str(message))
     report("Loading configuration from gh-repos.json")
     with open(CONF_FILE, 'r') as repo_conf_file:
         repo_conf = json.load(repo_conf_file)
