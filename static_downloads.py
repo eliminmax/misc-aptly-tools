@@ -22,31 +22,35 @@ import json
 from misc_aptly_tool_util import download
 
 SCRIPT_DIR = Path.cwd()
-DEB_DIR = Path('debs')
-CONF_FILE = Path('confs', 'static-urls.json')
+DEB_DIR = Path("debs")
+CONF_FILE = Path("confs", "static-urls.json")
 
 
 def get_new(verbose=False):
     """Download all new .deb packages"""
+
     def report(message, indent=0):
         if verbose:
             print(("    " * indent) + str(message))
-    with open(CONF_FILE, 'r') as package_url_json:
-        report('Loading configuration from package_urls.json')
+
+    with open(CONF_FILE, "r") as package_url_json:
+        report("Loading configuration from package_urls.json")
         packages = json.load(package_url_json)
     report("Loaded configuration", 1)
     for package_name in packages:
-        report(f'Working on package {package_name}')
-        package = DEB_DIR.joinpath(package_name+'.deb')
-        url = packages[package_name]['url']
+        report(f"Working on package {package_name}")
+        package = DEB_DIR.joinpath(package_name + ".deb")
+        url = packages[package_name]["url"]
         download(url, package)
 
 
-if __name__ == '__main__':
-    print("Miscellaneous Aptly Tools Copyright (C) 2021 Eli Array Minkoff\n" +
-          "This program comes with ABSOLUTELY NO WARRANTY; " +
-          "This is free software, and you are welcome to redistribute" +
-          "it under certain conditions; for details, " +
-          "see the GNU General Public Licence version 3, " +
-          "available in the LICENCE file that should have come with this.")
+if __name__ == "__main__":
+    print(
+        "Miscellaneous Aptly Tools Copyright (C) 2021 Eli Array Minkoff\n"
+        + "This program comes with ABSOLUTELY NO WARRANTY; "
+        + "This is free software, and you are welcome to redistribute"
+        + "it under certain conditions; for details, "
+        + "see the GNU General Public Licence version 3, "
+        + "available in the LICENCE file that should have come with this."
+    )
     get_new(verbose=True)

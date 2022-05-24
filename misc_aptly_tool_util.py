@@ -22,9 +22,9 @@ import requests
 
 SCRIPT_DIR = Path.cwd()
 # TODO: allow user to specify directories, rather than this
-DEB_DIR = SCRIPT_DIR.joinpath('debs')
-CONF_DIR = SCRIPT_DIR.joinpath('confs')
-DATA_DIR = SCRIPT_DIR.joinpath('data')
+DEB_DIR = SCRIPT_DIR.joinpath("debs")
+CONF_DIR = SCRIPT_DIR.joinpath("confs")
+DATA_DIR = SCRIPT_DIR.joinpath("data")
 
 
 def eprint(*args):
@@ -36,7 +36,7 @@ def download(uri, destination):
     """download file from uri to destination, without exhausting memory"""
     with requests.get(uri, stream=True, allow_redirects=True) as r:
         r.raise_for_status()
-        with open(destination, 'wb') as f:
+        with open(destination, "wb") as f:
             for segment in r.iter_content(4096):
                 if segment:
                     f.write(segment)

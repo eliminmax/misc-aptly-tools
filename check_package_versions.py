@@ -29,8 +29,7 @@ from misc_aptly_tool_util import SCRIPT_DIR
 
 
 def check_deb_file_versions(verbose=False):
-    """Check metadata for all packages in DEB_DIR against existing versions
-    """
+    """Check metadata for all packages in DEB_DIR against existing versions"""
     # If ./confs/existing.json exists, load it in.
     EXISTING_DEBS_FILE = SCRIPT_DIR.joinpath("confs", "existing.json")
     if EXISTING_DEBS_FILE.exists():
@@ -44,9 +43,11 @@ def check_deb_file_versions(verbose=False):
         # If loaded
         if not type(existing_deb_info) == list:
             if verbose:
-                eprint("./info/existing.json was valid JSON,",
-                       "but was not imported as a list.",
-                       "Creating an empty list to use")
+                eprint(
+                    "./info/existing.json was valid JSON,",
+                    "but was not imported as a list.",
+                    "Creating an empty list to use",
+                )
             del existing_deb_info
             existing_deb_info = list()
     else:
@@ -59,17 +60,25 @@ def check_deb_file_versions(verbose=False):
             "Version": deb_headers["Version"],
             "Architecture": deb_headers["Architecture"],
         }
-    # If this already exists, delete it, otherwise, add it to known versions
+        # If this already exists, delete it, otherwise, add it to known versions
         if deb_info in existing_deb_info:
             del_file(deb_file)
         else:
             # rename file to {package}_{version}_{arch}.deb, if needed
-            name_in_repo = (f'{deb_info["Package"]}_{deb_info["Version"]}_'
-                            f'{deb_info["Architecture"]}.deb')
+            name_in_repo = (
+                f'{deb_info["Package"]}_{deb_info["Version"]}_'
+                f'{deb_info["Architecture"]}.deb'
+            )
             if deb_file.name != name_in_repo:
                 if verbose:
-                    print("Package", deb_info["Package"], "renamed from",
-                          deb_file.name, "to", name_in_repo)
+                    print(
+                        "Package",
+                        deb_info["Package"],
+                        "renamed from",
+                        deb_file.name,
+                        "to",
+                        name_in_repo,
+                    )
                 deb_file.rename(deb_file.parent.joinpath(name_in_repo))
             # Add entry in existing_deb_info
             existing_deb_info.append(deb_info)
@@ -79,5 +88,5 @@ def check_deb_file_versions(verbose=False):
 
 
 # if called directly, run check_deb_file_versions()
-if __name__ == '__main__':
+if __name__ == "__main__":
     check_deb_file_versions(verbose=True)

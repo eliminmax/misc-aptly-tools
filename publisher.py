@@ -22,11 +22,11 @@ import subprocess
 from misc_aptly_tool_util import DEB_DIR
 from misc_aptly_tool_util import SCRIPT_DIR
 
-APTLY_COMMAND = 'aptly'
+APTLY_COMMAND = "aptly"
 
 
 def _load_conf():
-    with open(SCRIPT_DIR.joinpath('confs', 'aptly-config.json'), 'r') as conf:
+    with open(SCRIPT_DIR.joinpath("confs", "aptly-config.json"), "r") as conf:
         aptly_config = json.load(conf)
     return aptly_config
 
@@ -35,41 +35,71 @@ def _publish_new_packages(repo, to_add, pub, dist, gpg_conf, comp):
     gpg_flags = [f"-{flag}={gpg_conf[flag]}" for flag in gpg_conf]
 
     # check if aptly repo and publish exist or not
-    existing_repos = subprocess.check_output(
-        [APTLY_COMMAND, 'repo', 'list', '-raw']
-    ).decode().strip().splitlines()
+    existing_repos = (
+        subprocess.check_output([APTLY_COMMAND, "repo", "list", "-raw"])
+        .decode()
+        .strip()
+        .splitlines()
+    )
 
-    existing_pub_list = subprocess.check_output(
-        [APTLY_COMMAND, 'publish', 'list', '-raw']
-    ).decode().strip().splitlines()
+    existing_pub_list = (
+        subprocess.check_output([APTLY_COMMAND, "publish", "list", "-raw"])
+        .decode()
+        .strip()
+        .splitlines()
+    )
 
     if existing_pub_list and len(existing_pub_list):
-        existing_pubs = [p.split(' ')[0] for p in existing_pub_list]
+        existing_pubs = [p.split(" ")[0] for p in existing_pub_list]
     else:
         existing_pubs = []
     # create repo if it does not exist yet
     if repo not in existing_repos:
         subprocess.run(
-            [APTLY_COMMAND, 'repo', 'create', f'-component={comp}',
-             f'-distribution={dist}', repo],
-            check=True
+            [
+                APTLY_COMMAND,
+                "repo",
+                "create",
+                f"-component={comp}",
+                f"-distribution={dist}",
+                repo,
+            ],
+            check=True,
         )
     # add directory to repo
-    subprocess.run([APTLY_COMMAND, 'repo', 'add', '-force-replace',
-                    '-remove-files', repo, to_add], check=True)
+    subprocess.run(
+        [APTLY_COMMAND, "repo", "add", "-force-replace", "-remove-files", repo, to_add],
+        check=True,
+    )
 
     # publish repo if not already published, otherwise update publish
     if pub not in existing_pubs:
         subprocess.run(
-            [APTLY_COMMAND, 'publish', 'repo', '-batch', *gpg_flags,
-             f'-component={comp}', repo, pub],
-            check=True
+            [
+                APTLY_COMMAND,
+                "publish",
+                "repo",
+                "-batch",
+                *gpg_flags,
+                f"-component={comp}",
+                repo,
+                pub,
+            ],
+            check=True,
         )
     else:
         subprocess.run(
-            [APTLY_COMMAND, 'publish', 'update', '-force-overwrite',
-             *gpg_flags, '-batch',  dist, pub],
-            check=True
+            [
+                APTLY_COMMAND,
+                "publish",
+                "update",
+                "-force-overwrite",
+                *gpg_flags,
+                "-batch",
+                dist,
+                pub,
+            ],
+            check=True,
         )
 
 
@@ -77,14 +107,14 @@ def publish():
     """Publish all new packages"""
     aptly_config = _load_conf()
     _publish_new_packages(
-        aptly_config['repo'],
+        aptly_config["repo"],
         str(DEB_DIR.resolve()),
-        aptly_config['publish'],
-        aptly_config['distribution'],
-        aptly_config['gpg'] if 'gpg' in aptly_config else {},
-        aptly_config['component'] if 'component' in aptly_config else 'main'
+        aptly_config["publish"],
+        aptly_config["distribution"],
+        aptly_config["gpg"] if "gpg" in aptly_config else {},
+        aptly_config["component"] if "component" in aptly_config else "main",
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     publish()
