@@ -125,18 +125,18 @@ def get_new(verbose=False):
         # load existing version data
         existing_versions_data = known_assets[repo]['versions']
         report(
-            f"Existing versions: {[v for v in existing_versions_data.keys()]}",
+            f"Existing versions: {[v for v in existing_versions_data]}",
             1
         )
         # load json info
         release_info = get_latest_release_info(repo)
         version = release_info['version']
         report(f"Latest upstream version: {version}", 1)
-        if version not in existing_versions_data.keys():
+        if version not in existing_versions_data:
             existing_versions_data[version] = {}
 
         for node_id, asset in release_info['assets'].items():
-            if node_id not in existing_versions_data[version].keys():
+            if node_id not in existing_versions_data[version]:
                 existing_versions_data[version][node_id] = asset
                 if asset['name'].endswith('.deb'):
                     report("Loading file: "+asset['name'], 2)
