@@ -50,7 +50,7 @@ if __name__ == "__main__":
         + "This program comes with ABSOLUTELY NO WARRANTY; "
         + "This is free software, and you are welcome to redistribute"
         + "it under certain conditions; for details, "
-        + "see the GNU General Public Licence version 3, "
-        + "available in the LICENCE file that should have come with this."
+        + "see the GNU General Public License version 3, "
+        + "available in the LICENSE file that should have come with this."
     )
     get_new(verbose=True)

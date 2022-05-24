@@ -30,8 +30,8 @@ def main():
         + "This program comes with ABSOLUTELY NO WARRANTY; "
         + "This is free software, and you are welcome to redistribute"
         + "it under certain conditions; for details, "
-        + "see the GNU General Public Licence version 3, "
-        + "available in the LICENCE file that should have come with this."
+        + "see the GNU General Public License version 3, "
+        + "available in the LICENSE file that should have come with this."
     )
     if not DEB_DIR.is_dir():
         DEB_DIR.mkdir(parents=True)
