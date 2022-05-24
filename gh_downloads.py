@@ -30,8 +30,9 @@ from misc_aptly_tool_util import DEB_DIR
 
 
 # Declare Constants
-CONF_FILE = Path('confs', 'gh-repos.json')
-# Pattern for Github API calls
+# Configuration files
+GH_REPO_CONF = Path('confs', 'gh-repos.json')
+# Pattern for Github API calls to check for latest version data
 API_TEMPLATE = "https://api.github.com/repos/{}/releases/latest"
 # This regex is not exhaustive, but it's a good sanity check
 REPO_NAME_REGEX = re.compile('^[a-zA-Z0-9_\\-\\.]+/[a-zA-Z0-9\\-_\\.]+$')
@@ -56,7 +57,7 @@ class UnmatchedPatternError(ValueError):
 def get_latest_release_info(repo):
     """Get and parse the JSON info for the latest Github release for the repo
     Args:
-        repo: the name of the Github repository (e.g. 'sharkdp/fd'
+        repo: the name of the Github repository (e.g. 'sharkdp/fd')
     Returns:
         A dictionary with the relevant information extracted from the reply
         ['version']: (string) the version name for the release
@@ -92,7 +93,7 @@ def get_new(verbose=False):
         if verbose:
             print(("\t" * indent) + str(message))
     report("Loading configuration from gh-repos.json")
-    with open(CONF_FILE, 'r') as repo_conf_file:
+    with open(GH_REPO_CONF, 'r') as repo_conf_file:
         repo_conf = json.load(repo_conf_file)
     report("Loaded configuration", 1)
     for repo in repo_conf:
@@ -142,7 +143,7 @@ def get_new(verbose=False):
                                package_name, 3)
 
     # Save updated information to gh-repos.json
-    with open(CONF_FILE, 'w') as json_file:
+    with open(GH_REPO_CONF, 'w') as json_file:
         report("Writing updated info to gh-repos.json")
         json.dump(repo_conf, json_file, indent=4)
 
