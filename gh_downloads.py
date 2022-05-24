@@ -18,7 +18,6 @@ This script is a part of Miscellaneous Aptly Tools
 """
 import re
 import json
-from pathlib import Path
 from os import remove as del_file
 
 import requests
@@ -26,12 +25,15 @@ from pydpkg import Dpkg
 
 from misc_aptly_tool_util import eprint
 from misc_aptly_tool_util import download
+from misc_aptly_tool_util import DATA_DIR
+from misc_aptly_tool_util import CONF_DIR
 from misc_aptly_tool_util import DEB_DIR
 
 
 # Declare Constants
 # Configuration files
-GH_REPO_CONF = Path('confs', 'gh-repos.json')
+GH_REPO_CONF = CONF_DIR.joinpath('gh-repos.json')
+KNOWN_ASSETS_FILE = DATA_DIR.joinpath('known-gh-assets.json')
 # Pattern for Github API calls to check for latest version data
 API_TEMPLATE = "https://api.github.com/repos/{}/releases/latest"
 # This regex is not exhaustive, but it's a good sanity check
@@ -88,14 +90,21 @@ def get_latest_release_info(repo):
 
 
 def get_new(verbose=False):
-    """Download all new .deb packages"""
+    """Download all new .deb packages that match configuration"""
     def report(message, indent=0):
         if verbose:
             print(("\t" * indent) + str(message))
-    report("Loading configuration from gh-repos.json")
+
+    # Load configuration data from CONF_DIR/gh-repos.json
+    report(f"Loading configuration from {GH_REPO_CONF}")
     with open(GH_REPO_CONF, 'r') as repo_conf_file:
         repo_conf = json.load(repo_conf_file)
     report("Loaded configuration", 1)
+
+    # Load known versions from DATA_DIR/known-gh-assets
+    report(f"Loading known versions from {KNOWN_ASSETS_FILE}")
+    with open(KNOWN_ASSETS_FILE, 'r') as known_assets_file:
+        known_assets = json.load(known_assets)
     for repo in repo_conf:
         package_name = repo_conf[repo]['package']
         arches = repo_conf[repo]['architectures']
@@ -107,13 +116,14 @@ def get_new(verbose=False):
         except BadRepoNameError as error:
             eprint(error)
             continue
-        # ensure the assets data exist in the proper format, otherwise add it
-        if 'versions' not in repo_conf[repo].keys():
-            repo_conf[repo]['versions'] = {}
-        if type(repo_conf[repo]['versions']) == list:
-            del repo_conf[repo]['versions']
-            repo_conf[repo]['versions'] = {}
-        existing_versions_data = repo_conf[repo]['versions']
+        # ensure associated data exists in known_assets
+        if repo not in known_assets:
+            known_assets[repo] = {"versions": {}}
+        if 'versions' not in known_assets[repo]:
+            known_assets[repo]['versions'] = {}
+
+        # load existing version data
+        existing_versions_data = known_assets[repo]['versions']
         report(
             f"Existing versions: {[v for v in existing_versions_data.keys()]}",
             1
@@ -142,10 +152,10 @@ def get_new(verbose=False):
                                deb_headers['Package'] + ', not ' +
                                package_name, 3)
 
-    # Save updated information to gh-repos.json
-    with open(GH_REPO_CONF, 'w') as json_file:
-        report("Writing updated info to gh-repos.json")
-        json.dump(repo_conf, json_file, indent=4)
+    # Save updated information to KNOWN_ASSETS_FILE
+    with open(KNOWN_ASSETS_FILE, 'w') as json_file:
+        report(f"Writing updated info to {KNOWN_ASSETS_FILE}.")
+        json.dump(existing_versions_data, json_file, indent=4)
 
 
 def main():
