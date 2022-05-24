@@ -147,7 +147,7 @@ def get_new(verbose=False):
         json.dump(repo_conf, json_file, indent=4)
 
 
-if __name__ == "__main__":
+def main():
     print("Miscellaneous Aptly Tools Copyright (C) 2021 Eli Array Minkoff\n" +
           "This program comes with ABSOLUTELY NO WARRANTY; " +
           "This is free software, and you are welcome to redistribute " +
@@ -157,3 +157,7 @@ if __name__ == "__main__":
     if not DEB_DIR.is_dir():
         DEB_DIR.mkdir(parents=True)
     get_new(verbose=True)
+
+
+if __name__ == "__main__":
+    main()
