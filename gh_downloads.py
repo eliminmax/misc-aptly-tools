@@ -106,10 +106,15 @@ def get_new(verbose=False):
         repo_conf = json.load(repo_conf_file)
     report("Loaded configuration", 1)
 
-    # Load known versions from DATA_DIR/known-gh-assets
+    # Load known versions from DATA_DIR/known-gh-assets.json
     report(f"Loading known versions from {KNOWN_ASSETS_FILE}")
-    with open(KNOWN_ASSETS_FILE, "r") as known_assets_file:
-        known_assets = json.load(known_assets_file)
+    if KNOWN_ASSETS_FILE.is_file():
+        with open(KNOWN_ASSETS_FILE, "r") as known_assets_file:
+            known_assets = json.load(known_assets_file)
+    else:
+        report(f"{KNOWN_ASSETS_FILE} does not yet exist. Using empty data")
+        known_assets = {}
+
     for repo in repo_conf:
         package_name = repo_conf[repo]["package"]
         arches = repo_conf[repo]["architectures"]
