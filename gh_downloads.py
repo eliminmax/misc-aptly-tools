@@ -109,7 +109,7 @@ def get_new(verbose=False):
     # Load known versions from DATA_DIR/known-gh-assets
     report(f"Loading known versions from {KNOWN_ASSETS_FILE}")
     with open(KNOWN_ASSETS_FILE, "r") as known_assets_file:
-        known_assets = json.load(known_assets)
+        known_assets = json.load(known_assets_file)
     for repo in repo_conf:
         package_name = repo_conf[repo]["package"]
         arches = repo_conf[repo]["architectures"]
