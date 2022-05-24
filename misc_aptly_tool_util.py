@@ -21,18 +21,15 @@ from pathlib import Path
 import requests
 
 SCRIPT_DIR = Path.cwd()
+# TODO: allow user to specify directories, rather than this
 DEB_DIR = SCRIPT_DIR.joinpath('debs')
+CONF_DIR = SCRIPT_DIR.joinpath('confs')
+DATA_DIR = SCRIPT_DIR.joinpath('data')
 
 
 def eprint(*args):
     """Print *args to STDERR"""
-    # Bold red ANSI escape sequence
-    colorise = 'NO_COLOR' not in environ.keys()
-    ANSI_ERR = "\033[1;31m" if colorise else ''  # colors text red
-    ANSI_RESET = "\033[00m" if colorise else ''  # Reset ANSI formatting
-    print(ANSI_ERR, end='', file=stderr)
-    print(*args, end='', file=stderr)
-    print(ANSI_RESET, file=stderr)
+    print(*args, file=stderr)
 
 
 def download(uri, destination):
