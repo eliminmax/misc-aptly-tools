@@ -60,7 +60,7 @@ def check_deb_file_versions(verbose=False):
             "Version": deb_headers["Version"],
             "Architecture": deb_headers["Architecture"],
         }
-        # If this already exists, delete it, otherwise, add it to known versions
+        # If this package/version/arch combo already exists, delete new file
         if deb_info in existing_deb_info:
             del_file(deb_file)
         else:
