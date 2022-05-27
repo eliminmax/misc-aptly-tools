@@ -164,9 +164,9 @@ def get_new(verbose=False):
                         )
 
     # Save updated information to KNOWN_ASSETS_FILE
-    with open(KNOWN_ASSETS_FILE, "w") as json_file:
+    with open(KNOWN_ASSETS_FILE, "w") as known_assets_file:
         report(f"Writing updated info to {KNOWN_ASSETS_FILE}.")
-        json.dump(existing_versions_data, json_file, indent=4)
+        json.dump(known_assets, known_assets_file)
 
 
 def main():
