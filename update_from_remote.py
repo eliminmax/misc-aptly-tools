@@ -28,7 +28,7 @@ def main():
     print(
         "Miscellaneous Aptly Tools Copyright (C) 2021 Eli Array Minkoff\n"
         + "This program comes with ABSOLUTELY NO WARRANTY; "
-        + "This is free software, and you are welcome to redistribute"
+        + "This is free software, and you are welcome to redistribute "
         + "it under certain conditions; for details, "
         + "see the GNU General Public License version 3, "
         + "available in the LICENSE file that should have come with this."
